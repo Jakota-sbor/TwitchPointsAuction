@@ -1,0 +1,29 @@
+﻿<Window x:Class="TwitchPointsAuction.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchPointsAuction"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <ItemsControl Name="AnimeBetList" ItemsSource="{Binding AuctionElements}"
+                  ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility ="Disabled" HorizontalContentAlignment="Stretch">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" Rows="3" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel LastChildFill="True">
+                        <Label DockPanel.Dock="Top" Height="30" Content="{Binding TotalBet}"/>
+                        <local:AnimeDetailsControl DataContext="{Binding AnimeData}"/>
+                    </DockPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Height="50" VerticalAlignment="Bottom" Click="Button_Click"></Button>
+    </Grid>
+</Window>

@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="TwitchPointsAuction.AnimeDetailsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TwitchPointsAuction"
+             mc:Ignorable="d" 
+             d:DesignHeight="360" d:DesignWidth="320" RenderTransformOrigin="0.5,0.5">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Tahoma"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+    <UserControl.RenderTransform>
+        <TransformGroup>
+            <ScaleTransform/>
+            <SkewTransform/>
+            <RotateTransform/>
+            <TranslateTransform/>
+        </TransformGroup>
+    </UserControl.RenderTransform>
+    <UserControl.Triggers>
+        <EventTrigger x:Name="eventTrigger" RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard RepeatBehavior="1x">
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX" From="-1" To="1" Duration="0:0:2" />
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].AngleY" From="0" To="10" Duration="0:0:1" />
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Children[1].AngleY" From="-10" To="0" BeginTime="0:0:1" Duration="0:0:1" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+    <Border BorderBrush="Black" BorderThickness="3" DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+        <Grid Name="grid_Main">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Image Name="image_Poster" Grid.Column="0" Grid.Row="0" Margin="5" Source="{Binding PosterUri}"/>
+            <StackPanel  Grid.Column="1" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Name="textblock_Title" Margin="5" FontSize="16" FontWeight="Bold" TextWrapping="WrapWithOverflow" Text="{Binding NameRus}"/>
+                <TextBlock Name="textblock_ReleaseDate" Text="{Binding AiredDate, StringFormat='Дата: dd.MM.yyyy'}"/>
+                <TextBlock Name="textblock_Episodes" Text="{Binding Episodes, StringFormat='Эпизодов: {0}'}"/>
+                <!--
+                <TextBlock Name="textblock_Seasons" Text="{Binding SeasonsCount, StringFormat='Сезонов: {0}'}"/>
+                <TextBlock Name="textblock_Duration" Text="{Binding Duration, StringFormat='Время: {0} мин'}"/>
+                <TextBlock Name="textblock_Genres" TextWrapping="Wrap" Text="{Binding AnimeInfo.Genres, StringFormat='Жанр: {0}'}"/>
+                -->
+            </StackPanel>
+            <ScrollViewer Name="scroll_Description" Margin="10" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2"  VerticalScrollBarVisibility="Hidden">
+                <TextBlock  Name="textblock_Description" TextWrapping="WrapWithOverflow" Text="{Binding Description}"/>
+            </ScrollViewer>
+            <!--
+             <TextBlock Name="textblock_VoteNumber" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" Text="{Binding ControlNumber, StringFormat='Номер: {0}'}"/>
+            <TextBlock Name="textblock_VotesCount" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Text="{Binding Votes, StringFormat='Голосов: {0}'}"/>
+            <TextBlock Name="textblock_Season" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" Text="{Binding Season, StringFormat='Сезон: {0}'}"/>           
+            -->
+        </Grid>
+    </Border>
+</UserControl>
