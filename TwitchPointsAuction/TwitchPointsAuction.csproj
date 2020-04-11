@@ -7,6 +7,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fonts\RobotoSlab-Black.ttf" />
+    <None Remove="Fonts\RobotoSlab-Bold.ttf" />
+    <None Remove="Fonts\RobotoSlab-ExtraBold.ttf" />
+    <None Remove="Fonts\RobotoSlab-ExtraLight.ttf" />
+    <None Remove="Fonts\RobotoSlab-Light.ttf" />
+    <None Remove="Fonts\RobotoSlab-Medium.ttf" />
+    <None Remove="Fonts\RobotoSlab-Regular.ttf" />
+    <None Remove="Fonts\RobotoSlab-SemiBold.ttf" />
+    <None Remove="Fonts\RobotoSlab-Thin.ttf" />
+    <None Remove="Resources\poster.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\RobotoSlab-Black.ttf" />
+    <Resource Include="Fonts\RobotoSlab-Bold.ttf" />
+    <Resource Include="Fonts\RobotoSlab-ExtraBold.ttf" />
+    <Resource Include="Fonts\RobotoSlab-ExtraLight.ttf" />
+    <Resource Include="Fonts\RobotoSlab-Light.ttf" />
+    <Resource Include="Fonts\RobotoSlab-Medium.ttf" />
+    <Resource Include="Fonts\RobotoSlab-Regular.ttf" />
+    <Resource Include="Fonts\RobotoSlab-SemiBold.ttf" />
+    <Resource Include="Fonts\RobotoSlab-Thin.ttf" />
+    <Resource Include="Resources\poster.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -26,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Websocket.Client" Version="4.2.3" />
   </ItemGroup>

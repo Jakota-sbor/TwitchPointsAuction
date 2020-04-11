@@ -23,12 +23,14 @@ namespace TwitchPointsAuction
     /// </summary>
     public partial class MainWindow : Window
     {
-        public AuctionViewModel viewModel = new AuctionViewModel(
+        public AuctionViewModel viewModel = new AuctionViewModel();
+            /*
+             * new AuctionViewModel(
             new IrcChatSettings("jakota_sbor", "oauth:l6czzcm0brb26k42a1a3d1cgqkqyop", "happasc2", "irc.chat.twitch.tv", 6667),
             new AuctionSettings(),
             new AuctionElementValidation()
             );
-
+            */
         public MainWindow()
         {
             InitializeComponent();
@@ -54,6 +56,20 @@ namespace TwitchPointsAuction
             {
                 Debug.WriteLine(exc.ToString());
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            foreach (var item in viewModel.AuctionElements)
+            {
+                item.IsShowPoster = !item.IsShowPoster;
+            }
+        }
+
+        private void togglebutton_Settings_Click(object sender, RoutedEventArgs e)
+        {
+            AuctionSettingsWindow wind = new AuctionSettingsWindow();
+            wind.Show();
         }
     }
 }

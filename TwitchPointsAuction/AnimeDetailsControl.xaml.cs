@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TwitchPointsAuction.Models;
 
 namespace TwitchPointsAuction
 {
@@ -20,6 +21,21 @@ namespace TwitchPointsAuction
     {
         int Delay = 0;
         bool IsDelay = false;
+
+        public static readonly DependencyProperty AnimeContentProperty = DependencyProperty.Register("AnimeContent", typeof(AnimeData), typeof(AnimeDetailsControl), new PropertyMetadata(new AnimeData()));
+        public static readonly DependencyProperty IsShowPosterProperty = DependencyProperty.Register("IsShowPoster", typeof(bool), typeof(AnimeDetailsControl), new PropertyMetadata(false));
+
+        public AnimeData AnimeContent
+        {
+            get { return (AnimeData)GetValue(AnimeContentProperty); }
+            set { SetValue(AnimeContentProperty, value); }
+        }
+
+        public bool IsShowPoster
+        {
+            get { return (bool)GetValue(IsShowPosterProperty); }
+            set { SetValue(IsShowPosterProperty, value); }
+        }
 
         public AnimeDetailsControl()
         {

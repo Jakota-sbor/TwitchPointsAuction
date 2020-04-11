@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace TwitchPointsAuction.Classes
 {
     public delegate void OnRewardHandler(object sender, TwitchPointsAuction.Models.Reward newReward);
+    public delegate void OnAuctionEventHandler(object sender, AuctionEvent newState);
 
     public interface IChat
     {

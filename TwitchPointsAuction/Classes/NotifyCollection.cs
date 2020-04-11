@@ -8,13 +8,16 @@ using System.Text;
 
 namespace TwitchPointsAuction.Classes
 {
-    public class NotifyCollection<T> : ICollection<T>, IEnumerable<T>, INotifyPropertyChanged, INotifyCollectionChanged
+    public class NotifyCollection<T> : ICollection<T>, IList<T>, INotifyPropertyChanged, INotifyCollectionChanged
     {
-        private List<T> _Collection;
+        private IList<T> _Collection;
         private const string CountString = "Count";
-        public NotifyCollection()
+
+        public NotifyCollection() : this(new List<T>()) { }
+
+        public NotifyCollection(IList<T> list) 
         {
-            _Collection = new List<T>();
+            _Collection = list;
         }
 
         public T this[int i]
@@ -53,7 +56,6 @@ namespace TwitchPointsAuction.Classes
             }
         }
 
-
         public bool Contains(T item)
         {
             return _Collection.Contains(item);
@@ -61,7 +63,7 @@ namespace TwitchPointsAuction.Classes
 
         public void CopyTo(T[] array, int index)
         {
-            _Collection.AddRange(array);
+            _Collection.CopyTo(array,index);
         }
 
         public int Count
@@ -88,6 +90,7 @@ namespace TwitchPointsAuction.Classes
             OnPropertyChanged(CountString);
             CollectionChanged?.Invoke(this, e);
         }
+
         public IEnumerator<T> GetEnumerator()
         {
             foreach (T val in _Collection)
@@ -99,6 +102,21 @@ namespace TwitchPointsAuction.Classes
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public int IndexOf(T item)
+        {
+            return _Collection.IndexOf(item);
+        }
+
+        public void Insert(int index, T item)
+        {
+            _Collection.Insert(index, item);
+        }
+
+        public void RemoveAt(int index)
+        {
+            _Collection.RemoveAt(index);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace TwitchPointsAuction.Classes
                 var posterUri = new Uri("https://shikimori.one" + (string)jsonO["image"]["original"], UriKind.Absolute);
                 var status = (string)jsonO["status"] == "released" ? Status.Released : Status.Ongoing;
                 DateTime airedDate = DateTime.TryParse((string)jsonO["aired_on"], out airedDate) ? airedDate : DateTime.Now;
-                var genres = (from genre in jsonO["genres"].Children() select (string)genre["russian"]).ToList();
+                var genres = (from genre in jsonO["genres"].Children() select (string)genre["russian"]).ToArray();
                 return new AnimeData
                 {
                     ID = id,

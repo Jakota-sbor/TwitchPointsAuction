@@ -4,26 +4,93 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TwitchPointsAuction"
+        xmlns:models="clr-namespace:TwitchPointsAuction.Models"
+        xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="766" Width="974"
         DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
+    <Window.Resources>
+        <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
+        <Style TargetType="TextBlock" x:Key="AuctionItemStatusTextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Verdana"/>
+            <Setter Property="BorderBrush" Value="LightBlue"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border 
+          Name="Border"
+          CornerRadius="2" 
+          Padding="2"
+          Background="#FFF"
+          BorderBrush="#888"
+          BorderThickness="1" >
+                            <Grid>
+                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                <TextBlock x:Name="WatermarkText" Text="{TemplateBinding Tag}" Foreground="Gray" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Collapsed" IsHitTestVisible="False"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Text}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible" TargetName="WatermarkText"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Text}" Value="">
+                                <Setter Property="Visibility" Value="Visible" TargetName="WatermarkText"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
-        <ItemsControl Name="AnimeBetList" ItemsSource="{Binding AuctionElements}"
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Orientation="Vertical" DataContext="{Binding Auction}">
+                <ToggleButton IsChecked="{Binding CurrentState, Converter={StaticResource EnumToBoolean}, Mode=TwoWay}" Content="ВКЛ/ВЫКЛ"/>
+                <TextBlock Text="{Binding CurrentTimeLeft, StringFormat={}{0:mm\\:ss} }"/>
+                <ToggleButton Name="togglebutton_Settings" Content="Settings" Click="togglebutton_Settings_Click"/>
+            </StackPanel>
+
+            <Button DockPanel.Dock="Bottom" Content="Initialize" Click="Button_Click"/>
+            <Button DockPanel.Dock="Bottom" Content="ShowPoster" Click="Button_Click_1"/>
+            <!--ItemsSource="{Binding AuctionElements}"-->
+            <ItemsControl x:Name="AnimeBetList"
                   ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility ="Disabled" HorizontalContentAlignment="Stretch">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="3" Rows="3" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <DockPanel LastChildFill="True">
-                        <Label DockPanel.Dock="Top" Height="30" Content="{Binding TotalBet}"/>
-                        <local:AnimeDetailsControl DataContext="{Binding AnimeData}"/>
-                    </DockPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <Button Height="50" VerticalAlignment="Bottom" Click="Button_Click"></Button>
+                <models:AuctionElementViewModel/>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" Rows="3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel LastChildFill="True" Background="DarkOrange">
+                                <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10 3" HorizontalAlignment="Center">
+                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding Index, StringFormat='★ {0}'}"/>
+                                    </Border>
+                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding TotalBet, StringFormat='💰 {0}'}"/>
+                                    </Border>
+                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding TotalBet, StringFormat='♥ {0}'}"/>
+                                    </Border>
+                                </WrapPanel>
+                            <local:AnimeDetailsControl DataContext="{Binding AnimeData}"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
     </Grid>
 </Window>

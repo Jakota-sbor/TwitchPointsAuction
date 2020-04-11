@@ -15,6 +15,7 @@ namespace TwitchPointsAuction.Classes
     class PubSub
     {
         public static event OnRewardHandler OnReward;
+
         private static Timer PubSubPingTimer;
         private static readonly Uri PubSubUri = new Uri("wss://pubsub-edge.twitch.tv");
         private static readonly ManualResetEvent ExitEvent = new ManualResetEvent(false);
@@ -31,6 +32,20 @@ namespace TwitchPointsAuction.Classes
                 //client.Options.SetRequestHeader("Origin", "xxx");
                 return client;
             });
+        //Tests
+        static Random rnd = new Random();
+        static string[] users = { "Billy", "Willy", "Pepega", "Kappa", "PepeLaugh", "PepeHands", "Rikardo", "Gaben", "Megumin", "Aqua" };
+        static string[] animes = { @"https://shikimori.one/animes/z5114-fullmetal-alchemist-brotherhood",
+            @"https://shikimori.one/animes/z9253-steins-gate",
+            @"https://shikimori.one/animes/32281-kimi-no-na-wa",
+            @"https://shikimori.one/animes/37991-jojo-no-kimyou-na-bouken-part-5-ougon-no-kaze",
+            @"https://shikimori.one/animes/1575-code-geass",
+            @"https://shikimori.one/animes/33486-boku-no-hero-academia-2nd-season",
+            @"https://shikimori.one/animes/z38040-kono-subarashii-sekai-ni-shukufuku-wo-kurenai-densetsu",
+            @"https://shikimori.one/animes/z33674-no-game-no-life-zero",
+            @"https://shikimori.one/animes/z31043-boku-dake-ga-inai-machi",
+            @"https://shikimori.one/animes/z38691-dr-stone",
+        };
 
         public static async Task Initialize()
         {
@@ -71,7 +86,16 @@ namespace TwitchPointsAuction.Classes
         {
             var client = state as IWebsocketClient;
             if (client.IsRunning)
+            {
+                //Tests
+                /*
+                var user = users[rnd.Next(10)];
+                var shikiurl = animes[rnd.Next(10)];
+                var cost = (uint)rnd.Next(1, 10) * 1000;
+                OnReward?.Invoke("twitch", new Models.Reward("1","1",user,shikiurl,cost,true));
+                */
                 client.Send((new JObject() { ["type"] = "PING" }).ToString());
+            }
         }
 
         private static async Task ListenWhispers(IWebsocketClient client)

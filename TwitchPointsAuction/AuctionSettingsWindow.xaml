@@ -1,0 +1,90 @@
+﻿<Window x:Class="TwitchPointsAuction.AuctionSettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchPointsAuction"
+        xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
+        mc:Ignorable="d"
+        Title="AuctionSettings" Height="450" Width="800"
+        DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
+    <Window.Resources>
+        <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
+        <classes:EnumToStringConverter x:Key="EnumToString"/>
+        <classes:IntToStringConverter x:Key="IntToString"/>
+        <classes:StringToTimeSpanConverter x:Key="StringToTimeSpan"/>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Verdana"/>
+            <Setter Property="BorderBrush" Value="LightBlue"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TextBox}">
+                        <Border 
+          Name="Border"
+          CornerRadius="2" 
+          Padding="2"
+          Background="#FFF"
+          BorderBrush="#888"
+          BorderThickness="1" >
+                            <Grid>
+                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                                <TextBlock x:Name="WatermarkText" Text="{TemplateBinding Tag}" Foreground="Gray" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Collapsed" IsHitTestVisible="False"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Text}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible" TargetName="WatermarkText"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Text}" Value="">
+                                <Setter Property="Visibility" Value="Visible" TargetName="WatermarkText"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <TabControl>
+            <TabItem Header="Настройка аукциона" DataContext="{Binding AuctionSettings}">
+                <TextBox Tag="Время на аукцион в формате мм:сс" Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"/>
+            </TabItem>
+            <TabItem Header="Правила ставок" DataContext="{Binding AuctionRules}">
+                <StackPanel Orientation="Vertical" Name="popup_Settings">
+                    <Expander Header="Год выхода" ExpandDirection="Down" Margin="5">
+                        <StackPanel Orientation="Vertical">
+                            <TextBox Name="textbox_YearFrom" Margin="5" MaxLength="4" Text="{Binding YearFrom, Mode=TwoWay, TargetNullValue=''}" Tag="От" />
+                            <TextBox Name="textbox_YearTo" Margin="5" MaxLength="4" Text="{Binding YearTo, Mode=TwoWay, TargetNullValue=''}" Tag="До"/>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header="Запрещенные жанры" ExpandDirection="Down" Margin="5" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox ItemsSource="{Binding ForbiddenGenres}" SelectionMode="Extended">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
+                                    <CheckBox Content="{Binding Key}" IsChecked="{Binding Value}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Expander>
+                    <Expander Header="Запрещенные форматы" ExpandDirection="Down" Margin="5">
+                        <ListBox ItemsSource="{Binding ForbiddenTypes,Mode=TwoWay}" SelectionMode="Extended">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Key, Converter={StaticResource EnumToString}}" IsChecked="{Binding Value}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Expander>
+                    <Expander Header="Запрещенные тайтлы" ExpandDirection="Down" IsExpanded="True" Margin="5" MaxHeight="200">
+                        <TextBox AcceptsReturn="True" Tag="Название тайтла" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    </Expander>
+                    <Button Content="TEST" Click="Button_Click"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
