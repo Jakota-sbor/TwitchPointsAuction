@@ -3,12 +3,26 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:TwitchPointsAuction"
         xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
+        xmlns:properties="clr-namespace:TwitchPointsAuction.Properties"   
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="AuctionSettings" Height="450" Width="800"
-        DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
+        Title="AuctionSettings" Height="450" Width="800">
     <Window.Resources>
+        <ObjectDataProvider x:Key="GenresEnum" MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:Genres"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="KindesEnum" MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:Kind"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
         <classes:EnumToStringConverter x:Key="EnumToString"/>
         <classes:IntToStringConverter x:Key="IntToString"/>
@@ -48,11 +62,13 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl>
-            <TabItem Header="Настройка аукциона" DataContext="{Binding AuctionSettings}">
-                <TextBox Tag="Время на аукцион в формате мм:сс" Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"/>
+        <TabControl DataContext="{x:Static properties:UserSettings.Default}">
+            <TabItem Header="Настройка аукциона" DataContext="{Binding DefaultAuctionSettings}">
+                <StackPanel Orientation="Vertical">
+                    <TextBox Tag="Время на аукцион в формате мм:сс" Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"/>
+                </StackPanel>
             </TabItem>
-            <TabItem Header="Правила ставок" DataContext="{Binding AuctionRules}">
+            <TabItem Header="Правила ставок" DataContext="{Binding DefaultAuctionRules}">
                 <StackPanel Orientation="Vertical" Name="popup_Settings">
                     <Expander Header="Год выхода" ExpandDirection="Down" Margin="5">
                         <StackPanel Orientation="Vertical">
@@ -61,11 +77,20 @@
                         </StackPanel>
                     </Expander>
                     <Expander Header="Запрещенные жанры" ExpandDirection="Down" Margin="5" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <ListBox ItemsSource="{Binding ForbiddenGenres}" SelectionMode="Extended">
+                        <ListBox ItemsSource="{Binding Source={StaticResource GenresEnum}}" SelectionMode="Extended">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
-                                    <CheckBox Content="{Binding Key}" IsChecked="{Binding Value}"/>
+                                    <CheckBox Name="checkBox_Genre" Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="False">
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="Checked">
+                                                <i:InvokeCommandAction Command="{Binding Source={x:Static properties:UserSettings.Default}, Path=DefaultAuctionRules.AddGenreCommand}" CommandParameter="{Binding}"/>
+                                            </i:EventTrigger>
+                                            <i:EventTrigger EventName="Unchecked">
+                                                <i:InvokeCommandAction Command="{Binding Source={x:Static properties:UserSettings.Default}, Path=DefaultAuctionRules.RemoveGenreCommand}" CommandParameter="{Binding}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </CheckBox>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -74,7 +99,9 @@
                         <ListBox ItemsSource="{Binding ForbiddenTypes,Mode=TwoWay}" SelectionMode="Extended">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <CheckBox Content="{Binding Key, Converter={StaticResource EnumToString}}" IsChecked="{Binding Value}"/>
+                                    <CheckBox Content="{Binding Path=., Converter={StaticResource EnumToString} }" IsChecked="False">
+
+                                    </CheckBox>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -82,7 +109,20 @@
                     <Expander Header="Запрещенные тайтлы" ExpandDirection="Down" IsExpanded="True" Margin="5" MaxHeight="200">
                         <TextBox AcceptsReturn="True" Tag="Название тайтла" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
                     </Expander>
-                    <Button Content="TEST" Click="Button_Click"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Авторизация PubSub" DataContext="{Binding TwitchPubSubSettings}">
+                <StackPanel Orientation="Vertical">
+                    <TextBox Tag="Логин Twitch" Name="textbox_PubSubLogin" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Канал Twitch" Name="textbox_PubSubChannel" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Токен авторизации PubSub" Name="textbox_PubSubToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Авторизация Twitch" DataContext="{Binding TwitchIrcSettings}">
+                <StackPanel Orientation="Vertical">
+                    <TextBox Tag="Логин Twitch" Name="textbox_TwitchChatLogin" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Канал Twitch" Name="textbox_TwitchChatChannel" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Токен авторизации Twitch" Name="textbox_TwitchChatToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

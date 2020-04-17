@@ -17,6 +17,8 @@
     <None Remove="Fonts\RobotoSlab-SemiBold.ttf" />
     <None Remove="Fonts\RobotoSlab-Thin.ttf" />
     <None Remove="Resources\poster.jpg" />
+    <None Remove="Resources\toggle_off.png" />
+    <None Remove="Resources\toggle_on.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +32,8 @@
     <Resource Include="Fonts\RobotoSlab-SemiBold.ttf" />
     <Resource Include="Fonts\RobotoSlab-Thin.ttf" />
     <Resource Include="Resources\poster.jpg" />
+    <Resource Include="Resources\toggle_off.png" />
+    <Resource Include="Resources\toggle_on.png" />
   </ItemGroup>
 
   <ItemGroup>

@@ -34,6 +34,7 @@ namespace TwitchPointsAuction
         public MainWindow()
         {
             InitializeComponent();
+            Properties.UserSettings.Default.Reset();
             this.DataContext = viewModel;
         }
 
@@ -70,6 +71,30 @@ namespace TwitchPointsAuction
         {
             AuctionSettingsWindow wind = new AuctionSettingsWindow();
             wind.Show();
+        }
+
+        private async void Button_LoadCompletedAnime(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime == null ||
+                   (Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime != null
+                   && Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime.Count() == 0))
+                {
+                    var AnimeList = await Requests.GetCompletedAnimeData();
+                    Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime = (NotifyCollection<string>)AnimeList.Item1;
+                    Properties.UserSettings.Default.Save();
+                    MessageBox.Show("Загружено " + AnimeList.Item1.Count + " просмотренных тайтлов!");
+                }
+                else
+                {
+                    MessageBox.Show("Список просмотренных тайтлов уже загружен!");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Ошибочка! Не удалось загрузить список просмотренных тайтлов");
+            }
         }
     }
 }

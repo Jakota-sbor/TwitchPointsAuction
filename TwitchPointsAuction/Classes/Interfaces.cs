@@ -16,7 +16,8 @@ namespace TwitchPointsAuction.Classes
 
         Task<bool> Connect();
         Task<bool> JoinChannel();
-        void Disconnect();
+        Task<bool> LeaveChannel();
+        Task<bool> Disconnect();
         void SendMessage(string msg);
     }
 }

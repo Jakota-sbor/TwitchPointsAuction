@@ -18,11 +18,9 @@ namespace TwitchPointsAuction.Models
         private readonly System.Threading.Timer Timer;
         private readonly TimeSpan TimeSpanTick = TimeSpan.FromMilliseconds(100);
         private TimeSpan currentTimeLeft = TimeSpan.Zero;
-        private TimeSpan defaultAuctionTime = TimeSpan.FromMinutes(10);
         private AuctionState currentState = AuctionState.Off;
 
         public TimeSpan CurrentTimeLeft { get => currentTimeLeft; private set { currentTimeLeft = value; OnPropertyChanged(); } }
-        public TimeSpan DefaultAuctionTime { get => defaultAuctionTime; private set { defaultAuctionTime = value; OnPropertyChanged();  } }
         public AuctionState CurrentState
         {
             get { return currentState; }
@@ -34,7 +32,7 @@ namespace TwitchPointsAuction.Models
                 {
                     case AuctionState.On:
                         OnAuctionEventChanged?.Invoke(this, AuctionEvent.Started);
-                        CurrentTimeLeft = DefaultAuctionTime;
+                        CurrentTimeLeft = Properties.UserSettings.Default.DefaultAuctionSettings.AuctionTime;
                         break;
                     case AuctionState.Off:
                         OnAuctionEventChanged?.Invoke(this, AuctionEvent.Stoped);
@@ -43,13 +41,18 @@ namespace TwitchPointsAuction.Models
                 }
             }
         }
+
         public bool CanBet => !(currentState == AuctionState.Off || currentTimeLeft == TimeSpan.Zero); 
 
-        public AuctionModel(TimeSpan? auctionTime=null)
+        public AuctionModel()
         {
             //Timer = new DispatcherTimer() { Interval = TimeSpanTick };
             Timer = new System.Threading.Timer(new System.Threading.TimerCallback(Timer_Tick), null, 0, 100);
-            DefaultAuctionTime = auctionTime ?? TimeSpan.FromMinutes(10);
+        }
+
+        public void AddTime(TimeSpan time)
+        {
+            CurrentTimeLeft += time;
         }
 
         private void Timer_Tick(object state)

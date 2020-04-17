@@ -13,5 +13,6 @@ namespace TwitchPointsAuction
     /// </summary>
     public partial class App : Application
     {
+
     }
 }

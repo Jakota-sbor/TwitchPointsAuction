@@ -35,16 +35,23 @@ namespace TwitchPointsAuction.Classes
 
         public void Add(T item)
         {
-            _Collection.Add(item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+            if (!_Collection.Contains(item))
+            {
+                _Collection.Add(item);
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+            }
         }
 
         public bool Remove(T item)
         {
             var index = _Collection.IndexOf(item);
-            _Collection.Remove(item);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
-            return true;
+            if (index != -1)
+            {
+                _Collection.Remove(item);
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+                return true;
+            }
+            return false;
         }
 
         public void Clear()

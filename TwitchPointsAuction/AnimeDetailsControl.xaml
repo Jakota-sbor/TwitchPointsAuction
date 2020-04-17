@@ -8,7 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
-             d:DesignHeight="320" d:DesignWidth="210" RenderTransformOrigin="0.5,0.5" ClipToBounds="True">
+             d:DesignHeight="320" d:DesignWidth="240" RenderTransformOrigin="0.5,0.5" ClipToBounds="True">
     <UserControl.Resources>
         <classes:GenresToStringConverter x:Key="GenresToString"/>
         <Style TargetType="TextBlock">
@@ -20,29 +20,37 @@
             <DoubleAnimation To="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Duration="0:0:5" RepeatBehavior="1x" AutoReverse="True"  
                              Storyboard.TargetName="image_Poster" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"/>
         </Storyboard>
-        <Storyboard x:Key="showPosterStoryboard" RepeatBehavior="1x">
-            <DoubleAnimation Storyboard.TargetName="image_Poster" Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX" From="0" To="1" Duration="0:0:2" >
-                <DoubleAnimation.EasingFunction>
-                    <QuarticEase EasingMode="EaseIn" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="grid_Details" Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX" From="1" To="0" Duration="0:0:2" >
-                <DoubleAnimation.EasingFunction>
-                    <QuarticEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-        </Storyboard>
-        <Storyboard x:Key="showDetailsStoryboard" RepeatBehavior="1x">
-            <DoubleAnimation Storyboard.TargetName="image_Poster" Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX" From="1" To="0" Duration="0:0:2" >
-                <DoubleAnimation.EasingFunction>
-                    <QuarticEase EasingMode="EaseOut" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
-            <DoubleAnimation Storyboard.TargetName="grid_Details" Storyboard.TargetProperty="RenderTransform.Children[0].ScaleX" From="0" To="1" Duration="0:0:2" >
-                <DoubleAnimation.EasingFunction>
-                    <QuarticEase EasingMode="EaseIn" />
-                </DoubleAnimation.EasingFunction>
-            </DoubleAnimation>
+        <Storyboard x:Key="showPosterStoryboard">
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="grid_PosterTitle"
+                Storyboard.TargetProperty="Opacity"
+                Duration="0:0:26"
+                RepeatBehavior="Forever">
+                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:0" />
+                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1" />
+                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:11" />
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:12" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="grid_Details"
+                Storyboard.TargetProperty="Opacity"
+                Duration="0:0:26"
+                RepeatBehavior="Forever">
+                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:12" />
+                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:13" />
+                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:18" />
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:19" />
+            </DoubleAnimationUsingKeyFrames>
+            <DoubleAnimationUsingKeyFrames
+                Storyboard.TargetName="grid_Description"
+                Storyboard.TargetProperty="Opacity"
+                Duration="0:0:26"
+                RepeatBehavior="Forever">
+                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:19" />
+                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:20" />
+                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:25" />
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:26" />
+            </DoubleAnimationUsingKeyFrames>
         </Storyboard>
     </UserControl.Resources>
     <UserControl.RenderTransform>
@@ -56,71 +64,46 @@
     <!-- DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" -->
     <Border x:Name="border" DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
         <i:Interaction.Triggers>
-            <i:DataTrigger Binding="{Binding IsShowPoster}" Value="True">
+            <i:EventTrigger EventName="Loaded" SourceObject="{Binding ElementName=border}">
                 <i:ControlStoryboardAction ControlStoryboardOption="Play" Storyboard="{StaticResource showPosterStoryboard}"/>
+                <!--
                 <i:ChangePropertyAction TargetObject="{Binding ElementName=border}" PropertyName="Background" Value="Black"/>
+                -->
+            </i:EventTrigger>
+            <!--
+            <i:DataTrigger Binding="{Binding}" Value="100" Comparison="LessThanOrEqual">
+                <i:ChangePropertyAction TargetObject="{Binding}" PropertyName="TitlePosition"  Value="{x:Static Dock.Right}"/>
             </i:DataTrigger>
-            <i:DataTrigger Binding="{Binding IsShowPoster}" Value="False">
-                <i:ControlStoryboardAction ControlStoryboardOption="Play" Storyboard="{StaticResource showDetailsStoryboard}"/>
-                <i:ChangePropertyAction TargetObject="{Binding ElementName=border}" PropertyName="Background" Value="Transparent"/>
-            </i:DataTrigger>
-            <i:DataTrigger Binding="{Binding ElementName=border, Path=ActualWidth}" Value="150" Comparison="LessThan">
-                <i:ChangePropertyAction TargetObject="{Binding ElementName=image_Poster}" PropertyName="Height" Value="0"/>
-            </i:DataTrigger>
+            -->
         </i:Interaction.Triggers>
-        <DockPanel LastChildFill="True">
-            <Image Name="image_Poster" DockPanel.Dock="Left"
-                   VerticalAlignment="Stretch" Stretch="Uniform" 
-                   Source="{StaticResource DefaultPoster}" Margin="3"
-                   Height="{Binding ElementName=border, Path=Height}" RenderTransformOrigin="0.5,0.5">
-                <Image.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="1"/>
-                        <SkewTransform AngleY="0"/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Image.RenderTransform>
-            </Image>
-            <Grid x:Name="grid_Details" RenderTransformOrigin="0.5,0.5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock 
-                Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"
-                Name="textblock_Title" Margin="3" FontSize="16"
-                FontWeight="Bold" TextWrapping="Wrap" 
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Center"
-                TextAlignment="Justify"
-                Text="{Binding AnimeContent.NameRus, FallbackValue='Этот глупый свин не понимает мечту девочки-зайки'}"/>
-                <WrapPanel Name="panel_Info" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical" >
+        <Grid>
+            <Grid x:Name="grid_Details" Opacity="0"  RenderTransformOrigin="0.5,0.5" Margin="5">
+                <WrapPanel Orientation="Vertical" Name="panel_Info" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center" >
+                    
                     <!-- Binding AnimeContent.PosterUri-->
-                    <StackPanel  Grid.Column="1" Grid.Row="1" Margin="3" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                        <TextBlock Name="textblock_Kind" TextWrapping="Wrap"
+                    <TextBlock Name="textblock_Kind" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
                                Text="{Binding AnimeContent.Kind, FallbackValue='Тип: ТВ', StringFormat='Тип: {0}'}"/>
-                        <TextBlock Name="textblock_ReleaseDate" TextWrapping="Wrap"
+                    <TextBlock Name="textblock_ReleaseDate" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
                                Text="{Binding AnimeContent.AiredDate, FallbackValue='Дата: 10.10.1992', StringFormat='Дата: dd.MM.yyyy'}"/>
-                        <TextBlock Name="textblock_Episodes" TextWrapping="Wrap"
+                    <TextBlock Name="textblock_Episodes" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
                                Text="{Binding AnimeContent.Episodes, FallbackValue='Эпизодов: 12', StringFormat='Эпизодов: {0}'}"/>
-                        <TextBlock Name="textblock_Genres"  TextWrapping="Wrap"
-                               Text="{Binding AnimeContent.Genres, FallbackValue='Комедия, Школа, Романтика, Сверхъестественное', Converter={StaticResource GenresToString}, StringFormat='Жанры: {0}'}"/>
-                        <!--
+                    <TextBlock Name="textblock_Genres"  TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
+                               Text="{Binding AnimeContent.Genres, FallbackValue='Жанры: Комедия, Школа, Романтика, Сверхъестественное', Converter={StaticResource GenresToString}, StringFormat='Жанры: {0}'}"/>
+                    <!--
                 <TextBlock Name="textblock_Seasons" Text="{Binding SeasonsCount, StringFormat='Сезонов: {0}'}"/>
                 <TextBlock Name="textblock_Duration" Text="{Binding Duration, StringFormat='Время: {0} мин'}"/>
                 -->
-                    </StackPanel>
                 </WrapPanel>
-                <ScrollViewer Name="scroll_Description" VerticalScrollBarVisibility="Hidden"
-                              Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Margin="3" >
-                    <TextBlock Name="textblock_Description" TextWrapping="WrapWithOverflow" Text="{Binding AnimeContent.Description, FallbackValue='Ничем не примечательный школьник Сакута Адзусагава проводит всё своё свободное время в библиотеке. Однажды он встречает девушку в костюме кролика, которая старше его на год. Она представляется как Маи Сакурадзима — прославленная актриса и первая красавица школы. Девушка рассказывает, что все вокруг перестали «видеть» её, поэтому она оделась так вызывающе. По мнению Маи, всё это из-за загадочного «подросткового синдрома». Адзусагава, недолго думая, решает помочь Сакурадзиме в решении этой странной проблемы. Однако кто мог знать, чем это обернётся...'}"/>
-                </ScrollViewer>
+                <!--
+                <Separator DockPanel.Dock="Top" Height="10"/>
+                -->
+                <!--
+                <i:Interaction.Triggers>
+                    <i:DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Path=ActualHeight}" Value="100" Comparison="LessThanOrEqual">
+                        <i:ChangePropertyAction TargetObject="{Binding ElementName=scroll_Description}" PropertyName="Visibility"  Value="{x:Static Visibility.Collapsed}"/>
+                    </i:DataTrigger>
+                </i:Interaction.Triggers>
+                -->
                 <Grid.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1"/>
@@ -130,6 +113,38 @@
                     </TransformGroup>
                 </Grid.RenderTransform>
             </Grid>
-        </DockPanel>
+            <Grid Name="grid_Description" Opacity="0" RenderTransformOrigin="0.5,0.5" Margin="5">
+                <!--
+                <ScrollViewer Name="scroll_Description" VerticalScrollBarVisibility="Hidden" Margin="5">
+                -->
+                <TextBlock Name="textblock_Description" TextWrapping="Wrap" TextTrimming="WordEllipsis"  Text="{Binding AnimeContent.Description,FallbackValue='Ничем не примечательный школьник Сакута Адзусагава проводит всё своё свободное время в библиотеке. Однажды он встречает девушку в костюме кролика, которая старше его на год. Она представляется как Маи Сакурадзима — прославленная актриса и первая красавица школы. Девушка рассказывает, что все вокруг перестали «видеть» её, поэтому она оделась так вызывающе. По мнению Маи, всё это из-за загадочного «подросткового синдрома». Адзусагава, недолго думая, решает помочь Сакурадзиме в решении этой странной проблемы. Однако кто мог знать, чем это обернётся...'}"/>
+            </Grid>
+            <Grid Name="grid_PosterTitle" Margin="5" RenderTransformOrigin="0.5,0.5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="3*"/>
+                </Grid.RowDefinitions>
+                <!--
+                {Binding TitlePosition, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}
+                -->
+                <TextBlock Grid.Row="0" Name="textblock_Title" Margin="3" FontSize="16"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                TextAlignment="Justify" TextTrimming="WordEllipsis" TextWrapping="WrapWithOverflow"
+                Text="{Binding AnimeContent.NameRus, FallbackValue='Этот глупый свин не понимает мечту девочки-зайки'}"/>
+                <Image Grid.Row="1" Name="image_Poster"
+                       Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Stretch" Source="{Binding AnimeContent.PosterUri}" Margin="3"/>
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleX="1"/>
+                        <SkewTransform AngleY="0"/>
+                        <RotateTransform/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Grid.RenderTransform>
+                
+            </Grid>
+        </Grid>
     </Border>
 </UserControl>

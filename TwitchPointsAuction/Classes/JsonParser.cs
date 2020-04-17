@@ -4,42 +4,58 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using TwitchPointsAuction.Models;
 
 namespace TwitchPointsAuction.Classes
 {
     class JsonParser
     {
+        private static Regex ShikiBracketsRegex = new Regex(@"\[[^\]]*\]", RegexOptions.Compiled);
         public static AnimeData ParseAnimeData(string jsonString)
         {
-            //List<AnimeData> AnimeList = new List<AnimeData>();
-            //foreach (var jsonString in jsonStrings)
-            //{
-                JObject jsonO = JObject.Parse(jsonString);
 
-                var id = (string)jsonO["id"];
-                var nameEng = (string)jsonO["name"];
-                var nameRus = (string)jsonO["russian"];
-                var description = (string)jsonO["description"];
-                int episodes = int.TryParse((string)jsonO["episodes"], out episodes) ? episodes : 0;
-                var posterUri = new Uri("https://shikimori.one" + (string)jsonO["image"]["original"], UriKind.Absolute);
-                var status = (string)jsonO["status"] == "released" ? Status.Released : Status.Ongoing;
-                DateTime airedDate = DateTime.TryParse((string)jsonO["aired_on"], out airedDate) ? airedDate : DateTime.Now;
-                var genres = (from genre in jsonO["genres"].Children() select (string)genre["russian"]).ToArray();
-                return new AnimeData
+            JObject jsonO = JObject.Parse(jsonString);
+
+            var id = ((string)jsonO["id"]).Replace("z","");
+            var nameEng = (string)jsonO["name"];
+            var nameRus = (string)jsonO["russian"];
+            var description =  ShikiBracketsRegex.Replace(((string)jsonO["description"]).Replace(@"[[", "").Replace(@"]]", "").Replace(@"\r\n",""), "");
+            int episodes = int.TryParse((string)jsonO["episodes"], out episodes) ? episodes : 0;
+            var posterUri = new Uri("https://shikimori.one" + (string)jsonO["image"]["original"], UriKind.Absolute);
+            var status = (string)jsonO["status"] == "released" ? Status.Released : Status.Ongoing;
+            DateTime airedDate = DateTime.TryParse((string)jsonO["aired_on"], out airedDate) ? airedDate : DateTime.Now;
+            var genres = jsonO["genres"] != null ? (from genre in jsonO["genres"].Children() select Enum.TryParse(typeof(Genres), (string)genre["russian"], out var genreenum) ? (Genres)genreenum : Genres.Shonen) : null;
+            return new AnimeData
+            {
+                ID = id,
+                NameEng = nameEng,
+                NameRus = nameRus,
+                Description = description,
+                Episodes = episodes,
+                PosterUri = posterUri,
+                Status = status,
+                AiredDate = airedDate,
+                Genres = genres
+            };
+
+        }
+
+        public static ICollection<string> ParseListAnimeData(string jsonString)
+        {
+            List<string> AnimeList = new List<string>();
+            var results = JArray.Parse(jsonString);
+
+            foreach (var result in results) 
+            {
+                if ((string)result["status"] == "completed")
                 {
-                    ID = id,
-                    NameEng = nameEng,
-                    NameRus = nameRus,
-                    Description = description,
-                    Episodes = episodes,
-                    PosterUri = posterUri,
-                    Status = status,
-                    AiredDate = airedDate,
-                    Genres = genres
-                };
-            //}
-            //return AnimeList;
+                    //Debug.WriteLine("TITLE: "+result["anime"]["russian"].ToString()+" | ID: "+result["anime"]["id"].ToString());
+                    AnimeList.Add(result["anime"]["id"].ToString());
+                }
+            }
+               
+            return AnimeList;
         }
 
         public static Reward ParseReward(string jsonString)

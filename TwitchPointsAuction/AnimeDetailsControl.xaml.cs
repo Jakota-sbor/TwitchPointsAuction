@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TwitchPointsAuction.Classes;
 using TwitchPointsAuction.Models;
 
 namespace TwitchPointsAuction
@@ -19,11 +20,9 @@ namespace TwitchPointsAuction
     /// </summary>
     public partial class AnimeDetailsControl : UserControl
     {
-        int Delay = 0;
-        bool IsDelay = false;
-
         public static readonly DependencyProperty AnimeContentProperty = DependencyProperty.Register("AnimeContent", typeof(AnimeData), typeof(AnimeDetailsControl), new PropertyMetadata(new AnimeData()));
         public static readonly DependencyProperty IsShowPosterProperty = DependencyProperty.Register("IsShowPoster", typeof(bool), typeof(AnimeDetailsControl), new PropertyMetadata(false));
+        public static readonly DependencyProperty TitlePositionProperty = DependencyProperty.Register("TitlePosition", typeof(Dock), typeof(AnimeDetailsControl), new PropertyMetadata(Dock.Top));
 
         public AnimeData AnimeContent
         {
@@ -37,11 +36,17 @@ namespace TwitchPointsAuction
             set { SetValue(IsShowPosterProperty, value); }
         }
 
+        public Dock TitlePosition
+        {
+            get { return (Dock)GetValue(TitlePositionProperty); }
+            set { SetValue(TitlePositionProperty, value); System.Diagnostics.Trace.WriteLine("DOCK CHANGED"); }
+        }
+
         public AnimeDetailsControl()
         {
             InitializeComponent();
         }
-
+        /*
         public void Scroll()
         {
             if ((scroll_Description.VerticalOffset == scroll_Description.ScrollableHeight || scroll_Description.VerticalOffset == 0) && !IsDelay)
@@ -63,5 +68,6 @@ namespace TwitchPointsAuction
             else
                 scroll_Description.ScrollToVerticalOffset(scroll_Description.VerticalOffset + 5);
         }
+        */
     }
 }

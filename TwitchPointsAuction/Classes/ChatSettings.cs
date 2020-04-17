@@ -122,4 +122,23 @@ namespace TwitchPointsAuction.Classes
         }
         public IrcChatSettings() : base() { }
     }
+
+    public class PubSubSettings : ChatSettings
+    {
+        string uri = "wss://pubsub-edge.twitch.tv";
+
+        public override bool IsEmpty
+        {
+            get { return string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Token) || string.IsNullOrEmpty(Channel) || string.IsNullOrEmpty(Uri); }
+        }
+
+        public string Uri { get => uri; set => uri = value; }
+
+        public PubSubSettings(string accName, string accToken, string joinChannel, string uri) : base(accName, accToken, joinChannel)
+        {
+            this.Uri = uri;
+        }
+
+        public PubSubSettings() : base() { }
+    }
 }

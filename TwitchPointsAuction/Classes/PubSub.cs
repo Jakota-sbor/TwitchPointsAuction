@@ -12,15 +12,15 @@ using Websocket.Client;
 
 namespace TwitchPointsAuction.Classes
 {
-    class PubSub
+    public class PubSub
     {
-        public static event OnRewardHandler OnReward;
+        public event OnRewardHandler OnReward;
 
-        private static Timer PubSubPingTimer;
-        private static readonly Uri PubSubUri = new Uri("wss://pubsub-edge.twitch.tv");
-        private static readonly ManualResetEvent ExitEvent = new ManualResetEvent(false);
-        private static readonly IWebsocketClient client = new WebsocketClient(PubSubUri, WebSocketFactory);
-        private static Func<ClientWebSocket> WebSocketFactory = new Func<ClientWebSocket>(() =>
+        private Timer PubSubPingTimer;
+        private readonly ManualResetEvent ExitEvent = new ManualResetEvent(false);
+        private IWebsocketClient Client;
+
+        private Func<ClientWebSocket> WebSocketFactory = new Func<ClientWebSocket>(() =>
             {
                 var client = new ClientWebSocket
                 {
@@ -33,9 +33,10 @@ namespace TwitchPointsAuction.Classes
                 return client;
             });
         //Tests
-        static Random rnd = new Random();
-        static string[] users = { "Billy", "Willy", "Pepega", "Kappa", "PepeLaugh", "PepeHands", "Rikardo", "Gaben", "Megumin", "Aqua" };
-        static string[] animes = { @"https://shikimori.one/animes/z5114-fullmetal-alchemist-brotherhood",
+        /*
+        Random rnd = new Random();
+        string[] users = { "Billy", "Willy", "Pepega", "Kappa", "PepeLaugh", "PepeHands", "Rikardo", "Gaben", "Megumin", "Aqua" };
+        string[] animes = { @"https://shikimori.one/animes/z5114-fullmetal-alchemist-brotherhood",
             @"https://shikimori.one/animes/z9253-steins-gate",
             @"https://shikimori.one/animes/32281-kimi-no-na-wa",
             @"https://shikimori.one/animes/37991-jojo-no-kimyou-na-bouken-part-5-ougon-no-kaze",
@@ -46,86 +47,156 @@ namespace TwitchPointsAuction.Classes
             @"https://shikimori.one/animes/z31043-boku-dake-ga-inai-machi",
             @"https://shikimori.one/animes/z38691-dr-stone",
         };
-
-        public static async Task Initialize()
+        */
+        public PubSub()
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomainOnProcessExit;
             AssemblyLoadContext.Default.Unloading += DefaultOnUnloading;
             Console.CancelKeyPress += ConsoleOnCancelKeyPress;
+        }
 
-            client.Name = "PubSub";
-            client.ReconnectTimeout = TimeSpan.FromSeconds(30);
-            client.ErrorReconnectTimeout = TimeSpan.FromSeconds(30);
-            client.ReconnectionHappened.Subscribe(type =>
+        public async Task<bool> Connect()
+        {
+            try
             {
-                Debug.WriteLine($"Reconnection happened, type: {type}, url: {client.Url}");
-            });
-            client.DisconnectionHappened.Subscribe(info =>
-                Debug.WriteLine($"Disconnection happened, type: {info.Type}"));
-
-            client.MessageReceived.Subscribe(msg =>
-            {
-                Debug.WriteLine($"Message received: {msg}");
-                var jObject = JObject.Parse(msg.Text);
-                if ((string)jObject["type"] == "MESSAGE" && jObject["data"] != null)
+                Client = new WebsocketClient(new Uri(Properties.UserSettings.Default.TwitchPubSubSettings.Uri), WebSocketFactory)
                 {
-                    var newReward = JsonParser.ParseReward(((string)jObject["data"]["message"]).Replace('\\', Char.MinValue));
-                    OnReward?.Invoke("twitch", newReward);
+                    Name = "PubSub",
+                    ReconnectTimeout = TimeSpan.FromSeconds(5),
+                    ErrorReconnectTimeout = TimeSpan.FromSeconds(5)
+                };
+
+                PubSubPingTimer = new Timer(new TimerCallback(SendingPing), Client, 0, 5000);
+                Subscribe();
+
+                await Client.Start();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> JoinChannel()
+        {
+            try
+            {
+                await ListenChannelPoints(Properties.UserSettings.Default.TwitchPubSubSettings.Channel, Properties.UserSettings.Default.TwitchPubSubSettings.Token);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> LeaveChannel()
+        {
+            try
+            {
+                await ListenChannelPoints(Properties.UserSettings.Default.TwitchPubSubSettings.Channel, Properties.UserSettings.Default.TwitchPubSubSettings.Token, false);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        public async Task<bool> Disconnect()
+        {
+            try
+            {
+                await Client.Stop(WebSocketCloseStatus.Empty, string.Empty);
+                PubSubPingTimer.Dispose();
+                Client.Dispose();
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private void SendingPing(object state)
+        {
+            try
+            {
+                var client = state as IWebsocketClient;
+                if (client != null && client.IsRunning)
+                {
+                    //Tests
+                    /*
+                    var user = users[rnd.Next(10)];
+                    var shikiurl = animes[rnd.Next(10)];
+                    var cost = (uint)rnd.Next(1, 10) * 1000;
+                    OnReward?.Invoke("twitch", new Models.Reward("1","1",user,shikiurl,cost,true));
+                    */
+                    client.Send((new JObject() { ["type"] = "PING" }).ToString());
                 }
-            });
-
-            Debug.WriteLine("Starting...");
-            await client.Start();
-            Debug.WriteLine("Started.");
-            PubSubPingTimer = new Timer(new TimerCallback(SendingPing), client, 0, 10000);
-            //Task.Run(() => StartSendingPing(client));
-            await ListenWhispers(client);
-        }
-
-        private static void SendingPing(object state)
-        {
-            var client = state as IWebsocketClient;
-            if (client.IsRunning)
-            {
-                //Tests
-                /*
-                var user = users[rnd.Next(10)];
-                var shikiurl = animes[rnd.Next(10)];
-                var cost = (uint)rnd.Next(1, 10) * 1000;
-                OnReward?.Invoke("twitch", new Models.Reward("1","1",user,shikiurl,cost,true));
-                */
-                client.Send((new JObject() { ["type"] = "PING" }).ToString());
             }
+            catch { }
         }
 
-        private static async Task ListenWhispers(IWebsocketClient client)
+        private async Task ListenChannelPoints(string channel, string token, bool listen = true)
         {
-            if (client.IsRunning)
+            try
             {
-                string userid = (await Requests.GetUserID("sinedd92")).Item1;
-                client.Send((JObject.FromObject(new
+                if (Client.IsRunning)
                 {
-                    type = "LISTEN",
-                    data = new
+                    string userid = (await Requests.GetUserID(channel)).Item1;
+                    Client.Send((JObject.FromObject(new
                     {
-                        topics = new string[] { "channel-points-channel-v1." + userid },
-                        auth_token = "lwous17y267p47nk8o9dng6h2g68ur" //sinedd92
-                    }
-                })).ToString());
+                        type = listen ? "LISTEN" : "UNLISTEN",
+                        data = new
+                        {
+                            topics = new string[] { "channel-points-channel-v1." + userid },
+                            auth_token = token
+                        }
+                    })).ToString());
+                    Debug.WriteLine("Listen Send!");
+                }
             }
+            catch { }
         }
 
-        private static void CurrentDomainOnProcessExit(object sender, EventArgs eventArgs)
+        private void Subscribe()
+        {
+            try
+            {
+                Client.ReconnectionHappened.Subscribe(type =>
+                {
+                    Debug.WriteLine($"Reconnection happened, type: {type}, url: {Client.Url}");
+                });
+                Client.DisconnectionHappened.Subscribe(info =>
+                {
+                    Debug.WriteLine($"Disconnection happened, type: {info.Type}");
+                });
+
+                Client.MessageReceived.Subscribe(msg =>
+                {
+                    Debug.WriteLine($"Message received: {msg}");
+                    var jObject = JObject.Parse(msg.Text);
+                    if ((string)jObject["type"] == "MESSAGE" && jObject["data"] != null)
+                    {
+                        var newReward = JsonParser.ParseReward(((string)jObject["data"]["message"]).Replace('\\', Char.MinValue));
+                        OnReward?.Invoke("twitch", newReward);
+                    }
+                });
+            }
+            catch { }
+        }
+
+        private void CurrentDomainOnProcessExit(object sender, EventArgs eventArgs)
         {
             ExitEvent.Set();
         }
 
-        private static void DefaultOnUnloading(AssemblyLoadContext assemblyLoadContext)
+        private void DefaultOnUnloading(AssemblyLoadContext assemblyLoadContext)
         {
             ExitEvent.Set();
         }
 
-        private static void ConsoleOnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        private void ConsoleOnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             e.Cancel = true;
             ExitEvent.Set();

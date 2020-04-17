@@ -21,36 +21,19 @@ namespace TwitchPointsAuction.Classes
             }
         }
 
-        private IrcChatSettings chatSettings;
-
-        public TcpClient tcpclient { get; set; }
-        public NetworkStream ns { get; set; }
-        public StreamReader sr { get; set; }
-        public StreamWriter sw { get; set; }
-
-        public IrcChatSettings ChatSettings
-        {
-            get
-            {
-                return chatSettings;
-            }
-
-            set
-            {
-                chatSettings = value;
-            }
-        }
+        TcpClient tcpclient { get; set; }
+        NetworkStream ns { get; set; }
+        StreamReader sr { get; set; }
+        StreamWriter sw { get; set; }
 
         Task ReadMsgThread;
 
         CancellationTokenSource cancelReadSource;
         CancellationToken cancelReadToken;
 
-        public IrcChat(IrcChatSettings settings)
+        public IrcChat()
         {
-            ChatSettings = settings;
-            cancelReadSource = new CancellationTokenSource();
-            cancelReadToken = cancelReadSource.Token;
+
         }
 
         public async Task<bool> Connect()
@@ -59,13 +42,14 @@ namespace TwitchPointsAuction.Classes
             {
                 return await Task.Run<bool>(() =>
                 {
-                    tcpclient = new TcpClient(ChatSettings.IrcUrl, ChatSettings.IrcPort.Value);
+                    cancelReadSource = new CancellationTokenSource();
+                    cancelReadToken = cancelReadSource.Token;
+                    tcpclient = new TcpClient(Properties.UserSettings.Default.TwitchIrcSettings.IrcUrl, Properties.UserSettings.Default.TwitchIrcSettings.IrcPort.Value);
                     ns = tcpclient.GetStream();
                     sr = new StreamReader(ns);
                     sw = new StreamWriter(ns) { AutoFlush = true } ;
-                    sw?.WriteLine("PASS " + ChatSettings.Token);
-                    sw?.WriteLine("NICK " + ChatSettings.Name);
-                    sw?.WriteLine("USER " + ChatSettings.Name);
+                    sw?.WriteLine("PASS oauth:" + Properties.UserSettings.Default.TwitchIrcSettings.Token);
+                    sw?.WriteLine("NICK " + Properties.UserSettings.Default.TwitchIrcSettings.Name);
                     ReadMsgThread = ReadStreamTask(cancelReadToken);
                     return true;
                 });
@@ -85,7 +69,7 @@ namespace TwitchPointsAuction.Classes
                 {
                     if (IsConnected)
                     {
-                        sw?.WriteLine("JOIN #" + ChatSettings.Channel);
+                        sw?.WriteLine("JOIN #" + Properties.UserSettings.Default.TwitchIrcSettings.Channel);
                         sw?.WriteLine("CAP REQ :twitch.tv/commands");
                         sw?.WriteLine("CAP REQ :twitch.tv/tags");
                         sw?.WriteLine("CAP REQ :twitch.tv/tags twitch.tv/commands");
@@ -100,56 +84,64 @@ namespace TwitchPointsAuction.Classes
             }
         }
 
-        public async Task ExitFromChannel()
+        public async Task<bool> LeaveChannel()
         {
-            await Task.Run(() =>
+            try
             {
-                if (IsConnected)
-                    sw?.WriteLine("PART " + ChatSettings.Channel);
-            });
+                return await Task.Run<bool>(() =>
+                {
+                    if (IsConnected)
+                        sw?.WriteLine("PART " + Properties.UserSettings.Default.TwitchIrcSettings.Channel);
+                    return true;
+                });
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void SendMessage(string message)
         {
-            bool status = false;
             try
             {
                 if (IsConnected)
-                {
-                    sw?.WriteLine("PRIVMSG #" + ChatSettings.Name + " :" + message);
-                }
-                status = true;
+                    sw?.WriteLine("PRIVMSG #" + Properties.UserSettings.Default.TwitchIrcSettings.Channel + " :" + message);
             }
             catch (Exception e)
             {
-                status = false;
             }
         }
 
 
-        public void Disconnect()
+        public async Task<bool> Disconnect()
         {
             try
             {
-                if (cancelReadSource != null)
-                    cancelReadSource.Cancel();
-
-                while (!ReadMsgThread.IsCanceled)
+                return await Task<bool>.Run(() =>
                 {
-                }
+                    cancelReadSource?.Cancel();
 
-                sw?.Close();
-                sr?.Close();
-                ns?.Close();
-                tcpclient?.Close();
+                    while (!ReadMsgThread.IsCanceled)
+                    {
+                    }
 
-                sw = null;
-                sr = null;
-                ns = null;
-                tcpclient = null;
+                    sw?.Close();
+                    sr?.Close();
+                    ns?.Close();
+                    tcpclient?.Close();
+
+                    sw = null;
+                    sr = null;
+                    ns = null;
+                    tcpclient = null;
+                    return true;
+                });
             }
             catch
-            { }
+            {
+                return false;
+            }
         }
 
 
@@ -162,7 +154,7 @@ namespace TwitchPointsAuction.Classes
                     string inputLine = await sr.ReadLineAsync();
                     if (inputLine != null)
                         Trace.WriteLine(inputLine);
-                    if (inputLine != null && (inputLine.Contains("PRIVMSG") || inputLine.Contains("WHISPER")))
+                    if (inputLine != null && (inputLine.Contains("PRIVMSG")))
                         ParseIrcMessage(inputLine);
                     else if (inputLine != null && inputLine.Contains("PING"))
                     {

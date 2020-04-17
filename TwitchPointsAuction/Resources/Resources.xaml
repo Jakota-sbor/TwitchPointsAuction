@@ -2,6 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:TwitchPointsAuction">
     <BitmapImage x:Key='DefaultPoster' UriSource='pack://application:,,,/Resources/poster.jpg' />
+    <BitmapImage x:Key='Toggle_on' UriSource='pack://application:,,,/Resources/toggle_on.png' />
+    <BitmapImage x:Key='Toggle_off' UriSource='pack://application:,,,/Resources/toggle_off.png' />
+
     <LinearGradientBrush x:Key="Gradient1">
         <GradientStop Color="#FFF98900" Offset="1" />
         <GradientStop Color="#FFAC4E00" Offset="0" />

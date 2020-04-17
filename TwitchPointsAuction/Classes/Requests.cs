@@ -81,6 +81,26 @@ namespace TwitchPointsAuction.Classes
                 return (null, HttpStatusCode.InternalServerError);
             }
         }
+
+        public static async Task<(ICollection<string>, HttpStatusCode)> GetCompletedAnimeData(string userid= "378254")
+        {
+            try
+            {
+                client.DefaultRequestHeaders.Clear();
+                HttpResponseMessage response = await client.GetAsync(new Uri("https://shikimori.one/api/users/"+ userid+"/anime_rates?limit=5000"));
+                string jsonString = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine("JSON: " + jsonString);
+                return (JsonParser.ParseListAnimeData(jsonString), response.StatusCode);
+            }
+            catch (HttpRequestException e)
+            {
+                return (null, HttpStatusCode.InternalServerError);
+            }
+            catch (Exception e)
+            {
+                return (null, HttpStatusCode.InternalServerError);
+            }
+        }
         /*
         public static async Task<(AnimeData, HttpStatusCode)> SearchAnime(string name, int yearfrom, int yearto, Kind type = Kind.TV)
         {

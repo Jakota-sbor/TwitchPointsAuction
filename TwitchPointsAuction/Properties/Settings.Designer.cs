@@ -8,18 +8,81 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using TwitchPointsAuction.Classes;
+using TwitchPointsAuction.Models;
+
 namespace TwitchPointsAuction.Properties {
-    
-    
+
+
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.4.0.0")]
-    internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
-        
-        private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
-        
-        public static Settings Default {
+    public partial class UserSettings : global::System.Configuration.ApplicationSettingsBase {
+
+        private static UserSettings defaultInstance = ((UserSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new UserSettings())));
+
+        public static UserSettings Default {
             get {
                 return defaultInstance;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public IrcChatSettings TwitchIrcSettings
+        {
+            get
+            {
+                return ((IrcChatSettings)(this["TwitchIrcSettings"]));
+            }
+            set
+            {
+                this["TwitchIrcSettings"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public PubSubSettings TwitchPubSubSettings
+        {
+            get
+            {
+                return ((PubSubSettings)(this["TwitchPubSubSettings"]));
+            }
+            set
+            {
+                this["TwitchPubSubSettings"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public AuctionSettingsModel DefaultAuctionSettings
+        {
+            get
+            {
+                return ((AuctionSettingsModel)(this["DefaultAuctionSettings"]));
+            }
+            set
+            {
+                this["DefaultAuctionSettings"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public AuctionRulesModel DefaultAuctionRules
+        {
+            get
+            {
+                return ((AuctionRulesModel)(this["DefaultAuctionRules"]));
+            }
+            set
+            {
+                this["DefaultAuctionRules"] = value;
             }
         }
     }

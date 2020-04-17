@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace TwitchPointsAuction.Classes
 {
@@ -30,23 +31,45 @@ namespace TwitchPointsAuction.Classes
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value == null) return DependencyProperty.UnsetValue;
-            return GetDescription((Enum)value);
+            return ((Enum)value).GetDescription();
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return value;
         }
+    }
 
-        public static string GetDescription(Enum en)
+    public class ListEnumToBoolConverter : IValueConverter
+    {
+        Genres genre;
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return en.GetType()
-                       .GetMember(en.ToString())
-                       .First()
-                       .GetCustomAttribute<DescriptionAttribute>()?
-                       .Description ?? string.Empty;
+            if (parameter is NotifyCollection<Genres> && value is Genres)
+            {
+                var collection = (NotifyCollection<Genres>)parameter;
+                genre = (Genres)value;
+                return collection.Any(x=> x == genre);
+            }
+            return DependencyProperty.UnsetValue;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is bool)
+            {
+                var collection = (NotifyCollection<Genres>)parameter;
+                var boolvalue = (bool)value;
+                if (boolvalue)
+                    collection.Add(genre);
+                else
+                    collection.Remove(genre);
+            }
+            return DependencyProperty.UnsetValue;
         }
     }
+
     public class IntToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -90,6 +113,49 @@ namespace TwitchPointsAuction.Classes
         {
             if (value is string)
                 return TimeSpan.TryParseExact((string)value, @"mm\:ss", null, out var timespan) ? timespan : TimeSpan.FromMinutes(10);
+            return DependencyProperty.UnsetValue;
+        }
+    }
+
+    public class StringToTitlesConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is NotifyDictionary<string, bool>)
+            {
+                var titles = (NotifyDictionary<string, bool>)value;
+                return string.Join(Environment.NewLine, titles.Select(x => x.Key));
+            }
+            return DependencyProperty.UnsetValue;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string)
+            {
+                var titlesdict = new NotifyDictionary<string, bool>();
+                var titles = ((string)value).Split(Environment.NewLine).ToList();
+                foreach (var item in titles)
+                    titlesdict.Add(item, true);
+                return titlesdict;
+            }
+            return DependencyProperty.UnsetValue;
+        }
+    }
+
+    public class StringToBrushConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is SolidColorBrush)
+                return ((SolidColorBrush)value).Color.ToString();
+            return DependencyProperty.UnsetValue;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is string)
+                return new SolidColorBrush((Color)ColorConverter.ConvertFromString((string)value));
             return DependencyProperty.UnsetValue;
         }
     }

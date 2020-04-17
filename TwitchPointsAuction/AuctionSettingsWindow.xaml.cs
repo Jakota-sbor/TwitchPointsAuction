@@ -20,68 +20,15 @@ namespace TwitchPointsAuction
     /// </summary>
     public partial class AuctionSettingsWindow : Window
     {
-        private readonly List<string> DefaultGenres = new List<string>()
-        {
-            "Сёнен",
-            "Сёнен-ай",
-            "Сейнен",
-            "Сёдзё",
-            "Сёдзё-ай",
-            "Дзёсей",
-            "Комедия",
-            "Романтика",
-            "Школа",
-            "Безумие",
-            "Боевые искусства",
-            "Вампиры",
-            "Военное",
-            "Гарем",
-            "Демоны",
-            "Детектив",
-            "Детское",
-            "Драма",
-            "Игры",
-            "Исторический",
-            "Космос",
-            "Магия",
-            "Машины",
-            "Меха",
-            "Музыка",
-            "Пародия",
-            "Повседневность",
-            "Полиция",
-            "Приключения",
-            "Психологическое",
-            "Самураи",
-            "Сверхъестественное",
-            "Спорт",
-            "Супер сила",
-            "Ужасы",
-            "Фантастика",
-            "Фэнтези",
-            "Экшен",
-            "Этти",
-            "Триллер",
-            "Хентай",
-            "Яой",
-            "Юри"
-        };
-
-        public AuctionRulesModel AuctionRules { get; set; }
-        public AuctionSettingsModel AuctionSettings { get; set; }
-
         public AuctionSettingsWindow()
         {
             InitializeComponent();
-            this.DataContext = this;
-            AuctionSettings = new AuctionSettingsModel();
-            AuctionRules = new AuctionRulesModel() { ForbiddenGenres = new NotifyDictionary<string, bool>(DefaultGenres.Select(x=> new WritableKeyValuePair<string, bool>(x,false))),
-                                                     ForbiddenTypes = new NotifyDictionary<Classes.Kind, bool>(Enum.GetValues(typeof(Kind)).Cast<Kind>().Select(x=> new WritableKeyValuePair<Kind, bool>(x,false)))}; 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        ~AuctionSettingsWindow()
         {
-            AuctionRules.ForbiddenTypes[Kind.Movie] = true;
+            Properties.UserSettings.Default.DefaultAuctionRules.SaveRules();
+            Properties.UserSettings.Default.Save();
         }
     }
 }

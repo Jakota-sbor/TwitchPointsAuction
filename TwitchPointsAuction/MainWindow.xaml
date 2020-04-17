@@ -6,20 +6,26 @@
         xmlns:local="clr-namespace:TwitchPointsAuction"
         xmlns:models="clr-namespace:TwitchPointsAuction.Models"
         xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Title="MainWindow" Height="766" Width="974"
         DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
+        <classes:StringToBrushConverter x:Key="StringToBrush"/>
+        <Storyboard x:Key="betChangedStoryboard">
+            <ColorAnimation Duration="0:0:1" To="Green" Storyboard.TargetProperty="Foreground" Storyboard.TargetName="textBlock_ElementIndex"/>
+            <ColorAnimation BeginTime="0:0:1" Duration="0:0:1" To="White" Storyboard.TargetProperty="Foreground" Storyboard.TargetName="textBlock_ElementIndex"/>
+        </Storyboard>
         <Style TargetType="TextBlock" x:Key="AuctionItemStatusTextBlock">
             <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontSize" Value="22"/>
             <Setter Property="FontStyle" Value="Normal"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="3"/>
             <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
         </Style>
-        <Style TargetType="TextBox">
+        <Style TargetType="TextBox" x:Key="TextBoxWithTag">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Verdana"/>
             <Setter Property="BorderBrush" Value="LightBlue"/>
@@ -52,44 +58,102 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style TargetType="ToggleButton" x:Key="toggleOnOff">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FontFamily" Value="/Fonts/#RobotoSlab"/>
+            <Setter Property="FontWeight" Value="Thin"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <StackPanel Orientation="Horizontal">
+                            <Image x:Name="toggleImage" Source="{StaticResource Toggle_off}" MaxWidth="48" MaxHeight="48" Stretch="Uniform"/>
+                            <ContentPresenter x:Name="contentPresenter" 
+                                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        Content="{TemplateBinding Content}" Margin="5"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="toggleImage" Property="Source" Value="{StaticResource Toggle_on}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="toggleImage" Property="Source" Value="{StaticResource Toggle_off}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Grid>
-        <DockPanel LastChildFill="True">
-            <StackPanel DockPanel.Dock="Top" Orientation="Vertical" DataContext="{Binding Auction}">
-                <ToggleButton IsChecked="{Binding CurrentState, Converter={StaticResource EnumToBoolean}, Mode=TwoWay}" Content="ВКЛ/ВЫКЛ"/>
-                <TextBlock Text="{Binding CurrentTimeLeft, StringFormat={}{0:mm\\:ss} }"/>
-                <ToggleButton Name="togglebutton_Settings" Content="Settings" Click="togglebutton_Settings_Click"/>
-            </StackPanel>
-
-            <Button DockPanel.Dock="Bottom" Content="Initialize" Click="Button_Click"/>
-            <Button DockPanel.Dock="Bottom" Content="ShowPoster" Click="Button_Click_1"/>
+        <DockPanel x:Name="dockpanel_Main" LastChildFill="True" Background="{Binding WindowBackgroudColor}">
+            <ToolBar DockPanel.Dock="Top" Background="White"  ToolBarTray.IsLocked="True" Height="36" HorizontalContentAlignment="Center">
+                <ToggleButton Name="toggle_Auction" Style="{StaticResource toggleOnOff}" IsChecked="{Binding Auction.CurrentState, Converter={StaticResource EnumToBoolean}, Mode=TwoWay}" Content="Аукцион"/>
+                <ToggleButton Name="toggle_TwitchChat" Style="{StaticResource toggleOnOff}" Command="{Binding ToggleChatCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch Чат"/>
+                <ToggleButton Name="toggle_TwitchPubSub" Style="{StaticResource toggleOnOff}" Command="{Binding TogglePubSubCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch PubSub"/>
+                <TextBox Name="textBox_WindowBackground" Style="{StaticResource TextBoxWithTag}" Tag="Фоновый цвет в формате #FFFFFFFF" Text="{Binding WindowBackgroudColor, Converter={StaticResource StringToBrush}, UpdateSourceTrigger=LostFocus}"/>
+                <TextBlock Text="{Binding Auction.CurrentTimeLeft, StringFormat={}{0:mm\\:ss} }"/>
+                <Button Name="togglebutton_Settings" Content="Настройки" Click="togglebutton_Settings_Click"/>
+                <Button Content="Загрузить просмотренные аниме" Click="Button_LoadCompletedAnime"/>
+            </ToolBar>
             <!--ItemsSource="{Binding AuctionElements}"-->
-            <ItemsControl x:Name="AnimeBetList"
-                  ScrollViewer.CanContentScroll="False" ScrollViewer.HorizontalScrollBarVisibility ="Disabled" HorizontalContentAlignment="Stretch">
-                <models:AuctionElementViewModel/>
+            <ItemsControl x:Name="AnimeBetList" ItemsSource="{Binding AuctionElements}"
+                  ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility ="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="3" Rows="3" />
+                        <UniformGrid Columns="10" Rows="4" IsItemsHost="True"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <DockPanel LastChildFill="True" Background="DarkOrange">
-                                <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10 3" HorizontalAlignment="Center">
-                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
-                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding Index, StringFormat='★ {0}'}"/>
-                                    </Border>
-                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
-                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding TotalBet, StringFormat='💰 {0}'}"/>
-                                    </Border>
-                                    <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
-                                        <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Text="{Binding TotalBet, StringFormat='♥ {0}'}"/>
-                                    </Border>
-                                </WrapPanel>
-                            <local:AnimeDetailsControl DataContext="{Binding AnimeData}"/>
-                        </DockPanel>
+                        <Border BorderBrush="Black" Margin="3" BorderThickness="3" CornerRadius="15" Background="DarkOrange">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Viewbox Grid.Row="0">
+                                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                            <TextBlock Name="textBlock_ElementIndex" Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding Index, StringFormat='★ {0}', NotifyOnTargetUpdated=True}"/>
+                                        </Border>
+                                        <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                            <TextBlock Name="textBlock_ElementTotalBet" Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding TotalBet, StringFormat='💰 {0}', NotifyOnTargetUpdated=True}">
+                                                <TextBlock.Triggers>
+                                                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <ColorAnimation Duration="0:0:1" To="Green" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock_ElementTotalBet"/>
+                                                                <ColorAnimation BeginTime="0:0:1" Duration="0:0:1" To="White" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock_ElementTotalBet"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </EventTrigger>
+                                                </TextBlock.Triggers>
+                                            </TextBlock>
+                                        </Border>
+                                        <!--
+                                        <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
+                                            <TextBlock Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding TotalBet, StringFormat='♥ 100'}"/>
+                                        </Border>
+                                        -->
+                                    </StackPanel>
+                                </Viewbox>
+                                <local:AnimeDetailsControl Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" AnimeContent="{Binding AnimeData}"/>
+                            </Grid>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ContentPresenter}">
+                        <Setter Property="DockPanel.Dock" Value="Bottom"/>
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
             </ItemsControl>
         </DockPanel>
     </Grid>
