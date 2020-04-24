@@ -23,7 +23,8 @@ namespace TwitchPointsAuction
     /// </summary>
     public partial class MainWindow : Window
     {
-        public AuctionViewModel viewModel = new AuctionViewModel();
+        AuctionViewModel viewModel = new AuctionViewModel();
+        AuctionSettingsWindow windowSettings;
             /*
              * new AuctionViewModel(
             new IrcChatSettings("jakota_sbor", "oauth:l6czzcm0brb26k42a1a3d1cgqkqyop", "happasc2", "irc.chat.twitch.tv", 6667),
@@ -34,66 +35,39 @@ namespace TwitchPointsAuction
         public MainWindow()
         {
             InitializeComponent();
-            Properties.UserSettings.Default.Reset();
+            //Properties.UserSettings.Default.Reset();
             this.DataContext = viewModel;
-        }
-
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await viewModel.Initialize();
-                /*
-                List<string> animes = new List<string>() { "19", "37991", "z11741", "33486", "33255", "z31043", "16498", "9756", "z13601" };
-
-                foreach (var item in animes)
-                {
-                    viewModel.AnimeBetList.Add((await Requests.GetAnimeData(item)).Item1);
-                }
-                */
-
-            }
-            catch (Exception exc)
-            {
-                Debug.WriteLine(exc.ToString());
-            }
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            foreach (var item in viewModel.AuctionElements)
-            {
-                item.IsShowPoster = !item.IsShowPoster;
-            }
         }
 
         private void togglebutton_Settings_Click(object sender, RoutedEventArgs e)
         {
-            AuctionSettingsWindow wind = new AuctionSettingsWindow();
-            wind.Show();
+            if (windowSettings != null && windowSettings.WindowState == WindowState.Minimized)
+            {
+                windowSettings.WindowState = WindowState.Normal;
+                windowSettings.Activate();
+            }
+            else
+                windowSettings = new AuctionSettingsWindow();
+
+            windowSettings.Show();
         }
 
         private async void Button_LoadCompletedAnime(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime == null ||
-                   (Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime != null
-                   && Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime.Count() == 0))
-                {
-                    var AnimeList = await Requests.GetCompletedAnimeData();
-                    Properties.UserSettings.Default.DefaultAuctionRules.CompletedAnime = (NotifyCollection<string>)AnimeList.Item1;
-                    Properties.UserSettings.Default.Save();
-                    MessageBox.Show("Загружено " + AnimeList.Item1.Count + " просмотренных тайтлов!");
-                }
-                else
-                {
-                    MessageBox.Show("Список просмотренных тайтлов уже загружен!");
-                }
+                button_LoadCompletedAnimeList.IsEnabled = false;
+                var AnimeList = await Requests.GetCompletedAnimeData();
+                Settings.Instance.AuctionRules.CompletedAnime = new NotifyCollection<string>(AnimeList.Item1);
+                MessageBox.Show("Загружено " + AnimeList.Item1.Count + " просмотренных тайтлов!");
             }
-            catch
+            catch (Exception exc)
             {
-                MessageBox.Show("Ошибочка! Не удалось загрузить список просмотренных тайтлов");
+                MessageBox.Show("Ошибочка! Не удалось загрузить список просмотренных тайтлов"+exc.ToString());
+            }
+            finally
+            {
+                button_LoadCompletedAnimeList.IsEnabled = true;
             }
         }
     }

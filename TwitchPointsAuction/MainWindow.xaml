@@ -6,24 +6,65 @@
         xmlns:local="clr-namespace:TwitchPointsAuction"
         xmlns:models="clr-namespace:TwitchPointsAuction.Models"
         xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="MainWindow" Height="766" Width="974"
+        Title="Twitch аукцион" Height="720" Width="1280"
         DataContext="{Binding DataContext,RelativeSource={RelativeSource Self}}">
     <Window.Resources>
+        <classes:RandomBrushConverter x:Key="RandomBrush"/>
         <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
         <classes:StringToBrushConverter x:Key="StringToBrush"/>
+        <CollectionViewSource x:Key="AuctionItems" Source="{Binding AuctionElements}" >
+            <CollectionViewSource.SortDescriptions>
+                <scm:SortDescription PropertyName="TotalBet" Direction="Descending" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
         <Storyboard x:Key="betChangedStoryboard">
             <ColorAnimation Duration="0:0:1" To="Green" Storyboard.TargetProperty="Foreground" Storyboard.TargetName="textBlock_ElementIndex"/>
             <ColorAnimation BeginTime="0:0:1" Duration="0:0:1" To="White" Storyboard.TargetProperty="Foreground" Storyboard.TargetName="textBlock_ElementIndex"/>
         </Storyboard>
+        <Style TargetType="GridSplitter">
+            <Setter Property="Background" Value="WhiteSmoke"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Rectangle Fill="{TemplateBinding Background}"></Rectangle>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="ResizeDirection" Value="Columns">
+                                <Setter Property="Cursor" Value="SizeNS"></Setter>
+                            </Trigger>
+                            <Trigger Property="ResizeDirection" Value="Rows">
+                                <Setter Property="Cursor" Value="SizeWE"></Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
         <Style TargetType="TextBlock" x:Key="AuctionItemStatusTextBlock">
             <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
             <Setter Property="FontSize" Value="22"/>
             <Setter Property="FontStyle" Value="Normal"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="3"/>
-            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
         </Style>
         <Style TargetType="TextBox" x:Key="TextBoxWithTag">
             <Setter Property="FontSize" Value="14"/>
@@ -92,30 +133,58 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <DockPanel x:Name="dockpanel_Main" LastChildFill="True" Background="{Binding WindowBackgroudColor}">
-            <ToolBar DockPanel.Dock="Top" Background="White"  ToolBarTray.IsLocked="True" Height="36" HorizontalContentAlignment="Center">
-                <ToggleButton Name="toggle_Auction" Style="{StaticResource toggleOnOff}" IsChecked="{Binding Auction.CurrentState, Converter={StaticResource EnumToBoolean}, Mode=TwoWay}" Content="Аукцион"/>
-                <ToggleButton Name="toggle_TwitchChat" Style="{StaticResource toggleOnOff}" Command="{Binding ToggleChatCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch Чат"/>
-                <ToggleButton Name="toggle_TwitchPubSub" Style="{StaticResource toggleOnOff}" Command="{Binding TogglePubSubCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch PubSub"/>
-                <TextBox Name="textBox_WindowBackground" Style="{StaticResource TextBoxWithTag}" Tag="Фоновый цвет в формате #FFFFFFFF" Text="{Binding WindowBackgroudColor, Converter={StaticResource StringToBrush}, UpdateSourceTrigger=LostFocus}"/>
-                <TextBlock Text="{Binding Auction.CurrentTimeLeft, StringFormat={}{0:mm\\:ss} }"/>
-                <Button Name="togglebutton_Settings" Content="Настройки" Click="togglebutton_Settings_Click"/>
-                <Button Content="Загрузить просмотренные аниме" Click="Button_LoadCompletedAnime"/>
-            </ToolBar>
+        <DockPanel x:Name="dockpanel_Main" LastChildFill="True" Background="Black">
+            <Border DockPanel.Dock="Top" BorderThickness="3" CornerRadius="5" BorderBrush="White" Background="White" Margin="5" RenderTransformOrigin="0.5,0.5">
+                <WrapPanel  HorizontalAlignment="Center" Background="White">
+                    <ToggleButton Name="toggle_Auction" Style="{StaticResource toggleOnOff}" IsChecked="{Binding Auction.CurrentState, Converter={StaticResource EnumToBoolean}, Mode=TwoWay}" Content="Аукцион"/>
+                    <ToggleButton Name="toggle_TwitchChat" Style="{StaticResource toggleOnOff}" Command="{Binding ToggleChatCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch Чат"/>
+                    <ToggleButton Name="toggle_TwitchPubSub" Style="{StaticResource toggleOnOff}" Command="{Binding TogglePubSubCommand}" CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}" Content="Twitch PubSub"/>
+                    <Button Name="button_LoadCompletedAnimeList" Content="Загрузить просмотренные аниме" Click="Button_LoadCompletedAnime"/>
+                    <Button Name="togglebutton_Settings" Content="Настройки" Click="togglebutton_Settings_Click"/>
+                </WrapPanel>
+            </Border>
+            <Border DockPanel.Dock="Bottom" BorderThickness="3" CornerRadius="5" BorderBrush="White" Background="DimGray" Margin="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Name="textblock_AuctionRules" Foreground="WhiteSmoke" 
+                               FontWeight="SemiBold" FontSize="20"
+                               TextWrapping="Wrap" TextAlignment="Left" 
+                               VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+                    </TextBlock>
+                    <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False"/>
+                    <TextBlock Grid.Column="2" Foreground="WhiteSmoke" Name="textBlock_Leader"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                               FontWeight="Bold" FontSize="24" TextWrapping="Wrap" TextTrimming="WordEllipsis"
+                               Text="{Binding AuctionElementLeader, TargetNullValue=''}"/>
+                    <GridSplitter Grid.Column="3" Width="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" ShowsPreview="False"/>
+                    <TextBlock Grid.Column="4" Foreground="WhiteSmoke" Name="textBlock_AuctionTimeLeft" 
+                               VerticalAlignment="Center" HorizontalAlignment="Center" 
+                               FontWeight="Bold" FontSize="24" TextWrapping="Wrap"
+                               Text="{Binding Auction.CurrentTimeLeft, StringFormat={}{0:mm\\:ss}, FallbackValue='00:00' }"/>
+                </Grid>
+            </Border>
             <!--ItemsSource="{Binding AuctionElements}"-->
             <ItemsControl x:Name="AnimeBetList" ItemsSource="{Binding AuctionElements}"
-                  ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility ="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
+                          ScrollViewer.CanContentScroll="True" ScrollViewer.HorizontalScrollBarVisibility ="Disabled"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch"
+                          Margin="5">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="10" Rows="4" IsItemsHost="True"/>
+                        <UniformGrid VerticalAlignment="Top" Columns="10" Rows="4"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Black" Margin="3" BorderThickness="3" CornerRadius="15" Background="DarkOrange">
-                            <Grid>
+                        <Border BorderBrush="WhiteSmoke" Margin="3" BorderThickness="3" CornerRadius="15" Background="{Binding Converter={StaticResource RandomBrush}}">
+                            <Grid x:Name="border_AuctionElement">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition MaxHeight="50"/>
                                     <RowDefinition/>
                                 </Grid.RowDefinitions>
                                 <Viewbox Grid.Row="0">
@@ -124,7 +193,8 @@
                                             <TextBlock Name="textBlock_ElementIndex" Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding Index, StringFormat='★ {0}', NotifyOnTargetUpdated=True}"/>
                                         </Border>
                                         <Border Margin="3" BorderThickness="5" BorderBrush="White" CornerRadius="10">
-                                            <TextBlock Name="textBlock_ElementTotalBet" Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding TotalBet, StringFormat='💰 {0}', NotifyOnTargetUpdated=True}">
+                                            <TextBlock Name="textBlock_ElementTotalBet" Style="{StaticResource AuctionItemStatusTextBlock}" Margin="5" Text="{Binding TotalBet, StringFormat='💰 {0:## ##0 000}', NotifyOnTargetUpdated=True}">
+                                                <!--
                                                 <TextBlock.Triggers>
                                                     <EventTrigger RoutedEvent="Binding.TargetUpdated">
                                                         <BeginStoryboard>
@@ -135,6 +205,7 @@
                                                         </BeginStoryboard>
                                                     </EventTrigger>
                                                 </TextBlock.Triggers>
+                                                -->
                                             </TextBlock>
                                         </Border>
                                         <!--
@@ -151,7 +222,7 @@
                 </ItemsControl.ItemTemplate>
                 <ItemsControl.ItemContainerStyle>
                     <Style TargetType="{x:Type ContentPresenter}">
-                        <Setter Property="DockPanel.Dock" Value="Bottom"/>
+                        <Setter Property="DockPanel.Dock" Value="Top"/>
                     </Style>
                 </ItemsControl.ItemContainerStyle>
             </ItemsControl>

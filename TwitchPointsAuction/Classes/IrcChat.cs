@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchPointsAuction.Models;
 
 namespace TwitchPointsAuction.Classes
 {
@@ -33,7 +34,6 @@ namespace TwitchPointsAuction.Classes
 
         public IrcChat()
         {
-
         }
 
         public async Task<bool> Connect()
@@ -44,12 +44,12 @@ namespace TwitchPointsAuction.Classes
                 {
                     cancelReadSource = new CancellationTokenSource();
                     cancelReadToken = cancelReadSource.Token;
-                    tcpclient = new TcpClient(Properties.UserSettings.Default.TwitchIrcSettings.IrcUrl, Properties.UserSettings.Default.TwitchIrcSettings.IrcPort.Value);
+                    tcpclient = new TcpClient(Settings.Instance.IrcSettings.IrcUrl, Settings.Instance.IrcSettings.IrcPort.Value);
                     ns = tcpclient.GetStream();
                     sr = new StreamReader(ns);
                     sw = new StreamWriter(ns) { AutoFlush = true } ;
-                    sw?.WriteLine("PASS oauth:" + Properties.UserSettings.Default.TwitchIrcSettings.Token);
-                    sw?.WriteLine("NICK " + Properties.UserSettings.Default.TwitchIrcSettings.Name);
+                    sw?.WriteLine("PASS oauth:" + Settings.Instance.IrcSettings.Token);
+                    sw?.WriteLine("NICK " + Settings.Instance.IrcSettings.Name);
                     ReadMsgThread = ReadStreamTask(cancelReadToken);
                     return true;
                 });
@@ -69,7 +69,7 @@ namespace TwitchPointsAuction.Classes
                 {
                     if (IsConnected)
                     {
-                        sw?.WriteLine("JOIN #" + Properties.UserSettings.Default.TwitchIrcSettings.Channel);
+                        sw?.WriteLine("JOIN #" + Settings.Instance.IrcSettings.Channel);
                         sw?.WriteLine("CAP REQ :twitch.tv/commands");
                         sw?.WriteLine("CAP REQ :twitch.tv/tags");
                         sw?.WriteLine("CAP REQ :twitch.tv/tags twitch.tv/commands");
@@ -91,7 +91,7 @@ namespace TwitchPointsAuction.Classes
                 return await Task.Run<bool>(() =>
                 {
                     if (IsConnected)
-                        sw?.WriteLine("PART " + Properties.UserSettings.Default.TwitchIrcSettings.Channel);
+                        sw?.WriteLine("PART " + Settings.Instance.IrcSettings.Channel);
                     return true;
                 });
             }
@@ -106,7 +106,7 @@ namespace TwitchPointsAuction.Classes
             try
             {
                 if (IsConnected)
-                    sw?.WriteLine("PRIVMSG #" + Properties.UserSettings.Default.TwitchIrcSettings.Channel + " :" + message);
+                    sw?.WriteLine("PRIVMSG #" + Settings.Instance.IrcSettings.Channel + " :" + message);
             }
             catch (Exception e)
             {

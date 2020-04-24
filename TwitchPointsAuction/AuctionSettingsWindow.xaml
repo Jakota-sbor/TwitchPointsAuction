@@ -4,12 +4,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         xmlns:local="clr-namespace:TwitchPointsAuction"
         xmlns:classes="clr-namespace:TwitchPointsAuction.Classes"
-        xmlns:properties="clr-namespace:TwitchPointsAuction.Properties"   
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="AuctionSettings" Height="450" Width="800">
+        Title="Настройки" Height="600" Width="800" Closing="Window_Closing">
     <Window.Resources>
         <ObjectDataProvider x:Key="GenresEnum" MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
@@ -17,38 +17,86 @@
                 <x:Type TypeName="classes:Genres"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <ObjectDataProvider x:Key="KindesEnum" MethodName="GetValues"
+        <ObjectDataProvider x:Key="KindsEnum" MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
                 <x:Type TypeName="classes:Kind"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
-        <classes:EnumToBooleanConverter x:Key="EnumToBoolean"/>
+        <classes:ListEnumToBoolConverter x:Key="ListEnumToBool"/>
         <classes:EnumToStringConverter x:Key="EnumToString"/>
         <classes:IntToStringConverter x:Key="IntToString"/>
         <classes:StringToTimeSpanConverter x:Key="StringToTimeSpan"/>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="LightGray"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+        <Style TargetType="TextBlock" x:Key="TabHeader">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontFamily" Value="Verdana"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="Regular"/>
             <Setter Property="BorderBrush" Value="LightBlue"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="Margin" Value="3"/>
+            <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+            <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type TextBox}">
-                        <Border 
-          Name="Border"
-          CornerRadius="2" 
-          Padding="2"
-          Background="#FFF"
-          BorderBrush="#888"
-          BorderThickness="1" >
-                            <Grid>
-                                <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
-                                <TextBlock x:Name="WatermarkText" Text="{TemplateBinding Tag}" Foreground="Gray" Margin="5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Visibility="Collapsed" IsHitTestVisible="False"/>
-                            </Grid>
+                        <Border
+                                  Name="Border"
+                                  CornerRadius="2" 
+                                  Padding="2"
+                                  Background="#FFF"
+                                  BorderBrush="#888"
+                                  BorderThickness="1">
+                            <DockPanel LastChildFill="True">
+                                <Viewbox Name="HelpText" DockPanel.Dock="Left" Width="20" Height="20" Margin="3">
+                                    <Grid Width="20" Height="20" Background="White">
+                                        <Ellipse Stroke="Black" Fill="White" StrokeThickness="1"/>
+                                        <TextBlock Background="White" HorizontalAlignment="Center" Text="?" TextAlignment="Center" VerticalAlignment="Center"/>
+                                        <Grid.ToolTip>
+                                            <ToolTip Placement="Bottom" ToolTipService.BetweenShowDelay="{TemplateBinding ToolTipService.BetweenShowDelay}" ToolTipService.InitialShowDelay="{TemplateBinding ToolTipService.InitialShowDelay}" ToolTipService.ShowDuration="{TemplateBinding ToolTipService.ShowDuration}" Content="{TemplateBinding ToolTip}"/>
+                                        </Grid.ToolTip>
+                                    </Grid>
+                                </Viewbox>
+                                <Grid VerticalAlignment="Center">
+                                    <ScrollViewer x:Name="PART_ContentHost" Margin="5,0,0,0" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+                                    <TextBlock x:Name="WatermarkText" Text="{TemplateBinding Tag}" Foreground="Gray" Margin="5,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextAlignment="Left" TextWrapping="Wrap" Visibility="Collapsed" IsHitTestVisible="False"/>
+                                </Grid>
+                            </DockPanel>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=ToolTip}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" TargetName="HelpText"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=ToolTip}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" TargetName="HelpText"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=Text}" Value="{x:Null}">
                                 <Setter Property="Visibility" Value="Visible" TargetName="WatermarkText"/>
                             </DataTrigger>
@@ -62,67 +110,149 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <TabControl DataContext="{x:Static properties:UserSettings.Default}">
-            <TabItem Header="Настройка аукциона" DataContext="{Binding DefaultAuctionSettings}">
+        <TabControl>
+            <TabItem DataContext="{Binding AuctionSettings}">
+                <TabItem.Header>
+                    <TextBlock Style="{StaticResource TabHeader}" Text="Настройка аукциона"/>
+                </TabItem.Header>
                 <StackPanel Orientation="Vertical">
-                    <TextBox Tag="Время на аукцион в формате мм:сс" Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"/>
+                    <TextBox Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                             ToolTipService.BetweenShowDelay="0" ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000"
+                             Tag="Общее время в формате мм:сс"
+                             ToolTip="Время в течение которого можно добавлять новые элементы и делать ставки.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умолчанию: 30:00&#x0a;Пример: 05:30 - 5 минут 30 секунд"/>
+                    <TextBox Name="textbox_ThresholdTime" Text="{Binding DefaultAuctionThresholdTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                             Tag="Пороговое время в формате мм:сс"
+                             ToolTip="Время при достижении которого условия аукциона изменятся.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умочанию: 03:00&#x0a;Пример: 02:30 - 2 минуты 30 секунд"/>
+                    <TextBox Name="textbox_AddTime" Text="{Binding DefaultAdditionalTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                             Tag="Добавочное время в формате мм:сс"
+                             ToolTip="Время которое будет добавлено, если оставшееся время аукциона меньше порогового и произошло перебитие максимальной ставки.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умочанию: 02:00&#x0a;Пример: 01:30 - 1 минута 30 секунд"/>
+                    <TextBox Name="textbox_MaxElements" Text="{Binding MaxAuctionElements, Mode=TwoWay, TargetNullValue='' }"
+                             Tag="Максимальное число элементов аукциона" 
+                             ToolTip="Максимальное число элементов при достижении которого добавлять новые элементы будет нельзя.&#x0a;По умолчанию: 0.&#x0a;Для неограниченного количества элементов оставьте пустым или 0." />
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Правила ставок" DataContext="{Binding DefaultAuctionRules}">
+            <TabItem Name="tab_Rules" DataContext="{Binding AuctionRules}">
+                <TabItem.Header>
+                    <TextBlock Style="{StaticResource TabHeader}" Text="Правила аукциона"/>
+                </TabItem.Header>
                 <StackPanel Orientation="Vertical" Name="popup_Settings">
+                    <TextBox Name="textbox_AuctionRules" MinHeight="50" Text="{Binding AuctionRulesText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
+                             Tag="Правила аукциона, подстановки: (years) - интервал даты выхода, (genres) - запрещенные жанры, (kinds) - запрещенные форматы, (titles) - запрещенные названия"
+                             ToolTip=""/>
                     <Expander Header="Год выхода" ExpandDirection="Down" Margin="5">
                         <StackPanel Orientation="Vertical">
-                            <TextBox Name="textbox_YearFrom" Margin="5" MaxLength="4" Text="{Binding YearFrom, Mode=TwoWay, TargetNullValue=''}" Tag="От" />
-                            <TextBox Name="textbox_YearTo" Margin="5" MaxLength="4" Text="{Binding YearTo, Mode=TwoWay, TargetNullValue=''}" Tag="До"/>
+                            <TextBox Name="textbox_YearFrom" Margin="5" MaxLength="4" Text="{Binding YearFrom, Mode=TwoWay, TargetNullValue=''}" Tag="От"
+                                     ToolTip="Если дата выхода (год) меньше этого года, его нельзя будет добавить в аукцион.&#x0a;По умолчанию: 0&#x0a;Если год не ограничен оставьте пустым или 0."/>
+                            <TextBox Name="textbox_YearTo" Margin="5" MaxLength="4" Text="{Binding YearTo, Mode=TwoWay, TargetNullValue=''}" Tag="До"
+                                     ToolTip="Если дата выхода (год) больше этого года, его нельзя будет добавить в аукцион.&#x0a;По умолчанию: 0&#x0a;Если год не ограничен оставьте пустым или 0."/>
                         </StackPanel>
                     </Expander>
-                    <Expander Header="Запрещенные жанры" ExpandDirection="Down" Margin="5" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <ListBox ItemsSource="{Binding Source={StaticResource GenresEnum}}" SelectionMode="Extended">
+                    <Expander Header="Жанры" ExpandDirection="Down" Margin="5" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <DockPanel LastChildFill="True">
+                            <TextBox Name="textbox_ForbiddenGenres" Margin="5" Text="Жанры" Tag="" DockPanel.Dock="Top"
+                                     ToolTip="Жанры контента запрещенные/разрешенные для добавления&#x0a;По умолчанию: нет&#x0a;Отмечено: контент с таким жанром запрещен для добавления.&#x0a;Неотмечено: контент с таким жанром разрещен для добавления."/>
+                            <ListBox x:Name="listbox_ForbiddenGenres" ItemsSource="{Binding Source={StaticResource GenresEnum}}" VirtualizingPanel.IsVirtualizing="False">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
-                                    <CheckBox Name="checkBox_Genre" Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="False">
+                                    <CheckBox x:Name="checkbox_Genre" Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Genres }, Mode=OneWay}">
                                         <i:Interaction.Triggers>
                                             <i:EventTrigger EventName="Checked">
-                                                <i:InvokeCommandAction Command="{Binding Source={x:Static properties:UserSettings.Default}, Path=DefaultAuctionRules.AddGenreCommand}" CommandParameter="{Binding}"/>
+                                                <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
                                             </i:EventTrigger>
                                             <i:EventTrigger EventName="Unchecked">
-                                                <i:InvokeCommandAction Command="{Binding Source={x:Static properties:UserSettings.Default}, Path=DefaultAuctionRules.RemoveGenreCommand}" CommandParameter="{Binding}"/>
+                                                <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
                                             </i:EventTrigger>
                                         </i:Interaction.Triggers>
                                     </CheckBox>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        </DockPanel>
                     </Expander>
-                    <Expander Header="Запрещенные форматы" ExpandDirection="Down" Margin="5">
-                        <ListBox ItemsSource="{Binding ForbiddenTypes,Mode=TwoWay}" SelectionMode="Extended">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <CheckBox Content="{Binding Path=., Converter={StaticResource EnumToString} }" IsChecked="False">
-
-                                    </CheckBox>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                    <Expander Header="Форматы" ExpandDirection="Down" Margin="5">
+                        <DockPanel LastChildFill="True">
+                            <TextBox Name="textbox_ForbiddenKinds" Margin="5" Text="Форматы" Tag="" DockPanel.Dock="Top"
+                                     ToolTip="Форматы контента запрещенные/разрешенные для добавления&#x0a;По умолчанию: нет&#x0a;Отмечено: контент с таким форматом запрещен для добавления.&#x0a;Неотмечено: контент с таким форматом разрещен для добавления."/>
+                            <ListBox x:Name="listbox_ForbiddenKinds" ItemsSource="{Binding Source={StaticResource KindsEnum}}" VirtualizingPanel.IsVirtualizing="False">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Kinds }, Mode=OneWay}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="Checked" >
+                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                </i:EventTrigger>
+                                                <i:EventTrigger EventName="Unchecked">
+                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </CheckBox>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
                     </Expander>
-                    <Expander Header="Запрещенные тайтлы" ExpandDirection="Down" IsExpanded="True" Margin="5" MaxHeight="200">
-                        <TextBox AcceptsReturn="True" Tag="Название тайтла" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                    <Expander Header="Запрещенные названия" ExpandDirection="Down" Margin="5" MaxHeight="200">
+                        <TextBox AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 Tag="Одно название на строку" 
+                                 ToolTip="Название контента или его часть (фильма, аниме и т.д), которое нельзя будет добавить в аукцион. "/>
                     </Expander>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Авторизация PubSub" DataContext="{Binding TwitchPubSubSettings}">
+            <TabItem  DataContext="{Binding PubSettings}">
+                <TabItem.Header>
+                    <TextBlock Style="{StaticResource TabHeader}" Text="Настройки Twitch PubSub"/>
+                </TabItem.Header>
                 <StackPanel Orientation="Vertical">
+                    <DockPanel LastChildFill="True">
+                        <TextBox Name="textbox_AuthorizationPubSubGuide" DockPanel.Dock="Top" IsReadOnly="True" Text="Видео-пример авторизации">
+                            <TextBox.ToolTip>
+                                <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Resources/authorization_guide.gif"/>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                        <TextBlock Name="textBlock_AuthorizationPubSubGuideSteps" TextWrapping="Wrap">                           
+                        Для авторизации Twitch PubSub выполните следующие шаги: 
+                        <LineBreak/>(наведите курсор на "?" в кружке и подождите пару секунд для видео-примера выполнения)
+                        <LineBreak/>1) Нажмите кнопку "Авторизация", откроется веб-браузер и перейдет на страницу авторизации Twitch.
+                        <LineBreak/>2) Введите свои имя пользователя и пароль от учетной записи Twitch и нажмите "Войти".
+                        <LineBreak/>3) Внизу странице нажмите "Разрешить", чтобы предоставить StreamPointsAuctions (данное API приложение для взаимодействия с Twitch) необходимые возможности.
+                        <LineBreak/>4) Вас перенесет на страницу http://localhost, в строке адреса найдите и скопируйте текст после "access_token=" и до символа "@", закройте веб-браузер.
+                        <LineBreak/>5) Скопированный текст вставьте в поле "Токен авторизации Twitch PubSub"
+                        <LineBreak/>6) В полях "Логин Twitch" и "Канал Twitch" введите свой Twitch логин и Twitch канал (по умолчанию они совпадают)
+                        </TextBlock>
+                    </DockPanel>
+                    <Button  Name="button_PubSubLogin" Content="Авторизация Twitch PubSub" Click="button_PubSubLogin_Click"/>
                     <TextBox Tag="Логин Twitch" Name="textbox_PubSubLogin" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Tag="Канал Twitch" Name="textbox_PubSubChannel" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Tag="Токен авторизации PubSub" Name="textbox_PubSubToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Токен авторизации Twitch PubSub" Name="textbox_PubSubToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Авторизация Twitch" DataContext="{Binding TwitchIrcSettings}">
+            <TabItem DataContext="{Binding IrcSettings}">
+                <TabItem.Header>
+                    <TextBlock Style="{StaticResource TabHeader}" Text="Настройки Twitch Чата"/>
+                </TabItem.Header>
                 <StackPanel Orientation="Vertical">
+                    <DockPanel LastChildFill="True">
+                        <TextBox Name="textbox_AuthorizationChatGuide" DockPanel.Dock="Top" IsReadOnly="True" Text="Видео-пример авторизации">
+                            <TextBox.ToolTip>
+                                <Image gif:ImageBehavior.RepeatBehavior="Forever" gif:ImageBehavior.AnimatedSource="/Resources/authorization_guide.gif"/>
+                            </TextBox.ToolTip>
+                        </TextBox>
+                        <TextBlock Name="textBlock_AuthorizationChatGuideSteps" TextWrapping="Wrap">
+                        Для авторизации Twitch Чата выполните следующие шаги: 
+                        <LineBreak/>(наведите курсор на "?" в кружке и подождите пару секунд для видео-примера выполнения)
+                        <LineBreak/>1) Нажмите кнопку "Авторизация", откроется веб-браузер и перейдет на страницу авторизации Twitch.
+                        <LineBreak/>2) Введите свои имя пользователя и пароль от учетной записи Twitch и нажмите "Войти".
+                        <LineBreak/>3) Внизу странице нажмите "Разрешить", чтобы предоставить StreamPointsAuctions (данное API приложение для взаимодействия с Twitch) необходимые возможности.
+                        <LineBreak/>4) Вас перенесет на страницу http://localhost, в строке адреса найдите и скопируйте текст после "access_token=" и до символа "@", закройте веб-браузер.
+                        <LineBreak/>5) Скопированный текст вставьте в поле "Токен авторизации Twitch Чат"
+                        <LineBreak/>6) В полях "Логин Twitch" и "Канал Twitch" введите свой Twitch логин и Twitch канал (по умолчанию они совпадают)
+                        </TextBlock>
+                    </DockPanel>
+                    <Button  Name="button_ChatLogin" Content="Авторизация Twitch Чат" Click="button_ChatLogin_Click"/>
                     <TextBox Tag="Логин Twitch" Name="textbox_TwitchChatLogin" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Tag="Канал Twitch" Name="textbox_TwitchChatChannel" Text="{Binding Channel, UpdateSourceTrigger=PropertyChanged}"/>
-                    <TextBox Tag="Токен авторизации Twitch" Name="textbox_TwitchChatToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Tag="Токен авторизации Twitch Чат" Name="textbox_TwitchChatToken" Text="{Binding Token, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

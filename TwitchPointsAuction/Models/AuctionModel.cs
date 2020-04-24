@@ -18,9 +18,12 @@ namespace TwitchPointsAuction.Models
         private readonly System.Threading.Timer Timer;
         private readonly TimeSpan TimeSpanTick = TimeSpan.FromMilliseconds(100);
         private TimeSpan currentTimeLeft = TimeSpan.Zero;
+        private TimeSpan addTime = TimeSpan.Zero;
         private AuctionState currentState = AuctionState.Off;
 
         public TimeSpan CurrentTimeLeft { get => currentTimeLeft; private set { currentTimeLeft = value; OnPropertyChanged(); } }
+        public TimeSpan AddTime { get => addTime; private set { addTime = value; OnPropertyChanged(); } }
+
         public AuctionState CurrentState
         {
             get { return currentState; }
@@ -32,7 +35,7 @@ namespace TwitchPointsAuction.Models
                 {
                     case AuctionState.On:
                         OnAuctionEventChanged?.Invoke(this, AuctionEvent.Started);
-                        CurrentTimeLeft = Properties.UserSettings.Default.DefaultAuctionSettings.AuctionTime;
+                        CurrentTimeLeft = Settings.Instance.AuctionSettings.AuctionTime;
                         break;
                     case AuctionState.Off:
                         OnAuctionEventChanged?.Invoke(this, AuctionEvent.Stoped);
@@ -42,7 +45,8 @@ namespace TwitchPointsAuction.Models
             }
         }
 
-        public bool CanBet => !(currentState == AuctionState.Off || currentTimeLeft == TimeSpan.Zero); 
+        public bool CanBet => !(currentState == AuctionState.Off || currentTimeLeft == TimeSpan.Zero);
+
 
         public AuctionModel()
         {
@@ -50,14 +54,20 @@ namespace TwitchPointsAuction.Models
             Timer = new System.Threading.Timer(new System.Threading.TimerCallback(Timer_Tick), null, 0, 100);
         }
 
-        public void AddTime(TimeSpan time)
+        public void AddAuctionTime(TimeSpan time)
         {
-            CurrentTimeLeft += time;
+            AddTime = time; 
         }
 
         private void Timer_Tick(object state)
         {
-            CurrentTimeLeft = CurrentTimeLeft > TimeSpanTick ? CurrentTimeLeft -= TimeSpanTick : TimeSpan.Zero;
+            if (AddTime != TimeSpan.Zero)
+            {
+                CurrentTimeLeft += AddTime;
+                AddTime = TimeSpan.Zero;
+            }
+            else
+                CurrentTimeLeft = CurrentTimeLeft > TimeSpanTick ? CurrentTimeLeft -= TimeSpanTick : TimeSpan.Zero;
         }
 
         public void Dispose()

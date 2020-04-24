@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using TwitchPointsAuction.Models;
 using Websocket.Client;
 
 namespace TwitchPointsAuction.Classes
@@ -59,7 +60,7 @@ namespace TwitchPointsAuction.Classes
         {
             try
             {
-                Client = new WebsocketClient(new Uri(Properties.UserSettings.Default.TwitchPubSubSettings.Uri), WebSocketFactory)
+                Client = new WebsocketClient(new Uri(Settings.Instance.PubSettings.Uri), WebSocketFactory)
                 {
                     Name = "PubSub",
                     ReconnectTimeout = TimeSpan.FromSeconds(5),
@@ -82,7 +83,7 @@ namespace TwitchPointsAuction.Classes
         {
             try
             {
-                await ListenChannelPoints(Properties.UserSettings.Default.TwitchPubSubSettings.Channel, Properties.UserSettings.Default.TwitchPubSubSettings.Token);
+                await ListenChannelPoints(Settings.Instance.PubSettings.Channel, Settings.Instance.PubSettings.Token);
                 return true;
             }
             catch
@@ -95,7 +96,7 @@ namespace TwitchPointsAuction.Classes
         {
             try
             {
-                await ListenChannelPoints(Properties.UserSettings.Default.TwitchPubSubSettings.Channel, Properties.UserSettings.Default.TwitchPubSubSettings.Token, false);
+                await ListenChannelPoints(Settings.Instance.PubSettings.Channel, Settings.Instance.PubSettings.Token, false);
                 return true;
             }
             catch

@@ -82,7 +82,7 @@ namespace TwitchPointsAuction.Classes
             }
         }
 
-        public static async Task<(ICollection<string>, HttpStatusCode)> GetCompletedAnimeData(string userid= "378254")
+        public static async Task<(IList<string>, HttpStatusCode)> GetCompletedAnimeData(string userid= "378254")
         {
             try
             {

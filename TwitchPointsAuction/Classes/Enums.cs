@@ -5,6 +5,17 @@ using System.Text;
 
 namespace TwitchPointsAuction.Classes
 {
+    public enum CollectionType : int
+    {
+        [Description("Жанры")]
+        Genres = 0,
+        [Description("Форматы")]
+        Kinds,
+        [Description("Рейтинг")]
+        Rating,
+        [Description("Тайтлы")]
+        Titles,
+    }
 
     public enum AuctionEvent : int
     {

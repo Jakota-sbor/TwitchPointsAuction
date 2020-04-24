@@ -1,53 +1,76 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TwitchPointsAuction.Classes
 {
+    [JsonObject]
     public class NotifyCollection<T> : ICollection<T>, IList<T>, INotifyPropertyChanged, INotifyCollectionChanged
     {
-        private IList<T> _Collection;
+        [JsonProperty]
+        private IList<T> Collection;
+        [JsonIgnore]
         private const string CountString = "Count";
 
         public NotifyCollection() : this(new List<T>()) { }
 
         public NotifyCollection(IList<T> list) 
         {
-            _Collection = list;
+            Collection = list;
         }
 
         public T this[int i]
         {
             get
             {
-                return i >= 0 && i < Count ? _Collection[i] : default(T);
+                return i >= 0 && i < Count ? Collection[i] : default(T);
             }
             set
             {
-                _Collection[i] = value;
+                Collection[i] = value;
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value));
+            }
+        }
+
+        private RelayCommand addremoveCommand;
+        [JsonIgnore]
+        public RelayCommand AddRemoveCommand
+        {
+            get
+            {
+                return addremoveCommand ??
+                    (addremoveCommand = new RelayCommand(param =>
+                    {
+                        var item = (T)param;
+                        if (this.Contains(item))
+                            this.Remove(item);
+                        else
+                            this.Add(item);
+                    }));
             }
         }
 
         public void Add(T item)
         {
-            if (!_Collection.Contains(item))
+            if (!Collection.Contains(item))
             {
-                _Collection.Add(item);
+                Collection.Add(item);
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
             }
         }
 
         public bool Remove(T item)
         {
-            var index = _Collection.IndexOf(item);
+            var index = Collection.IndexOf(item);
             if (index != -1)
             {
-                _Collection.Remove(item);
+                Collection.Remove(item);
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
                 return true;
             }
@@ -58,24 +81,24 @@ namespace TwitchPointsAuction.Classes
         {
             if (Count > 0)
             {
-                _Collection.Clear();
+                Collection.Clear();
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             }
         }
 
         public bool Contains(T item)
         {
-            return _Collection.Contains(item);
+            return Collection.Contains(item);
         }
 
         public void CopyTo(T[] array, int index)
         {
-            _Collection.CopyTo(array,index);
+            Collection.CopyTo(array,index);
         }
 
         public int Count
         {
-            get { return _Collection.Count; }
+            get { return Collection.Count; }
         }
 
         public bool IsReadOnly
@@ -100,7 +123,7 @@ namespace TwitchPointsAuction.Classes
 
         public IEnumerator<T> GetEnumerator()
         {
-            foreach (T val in _Collection)
+            foreach (T val in Collection)
             {
                 yield return val;
             }
@@ -113,17 +136,43 @@ namespace TwitchPointsAuction.Classes
 
         public int IndexOf(T item)
         {
-            return _Collection.IndexOf(item);
+            return Collection.IndexOf(item);
         }
 
         public void Insert(int index, T item)
         {
-            _Collection.Insert(index, item);
+            Collection.Insert(index, item);
         }
 
         public void RemoveAt(int index)
         {
-            _Collection.RemoveAt(index);
+            Collection.RemoveAt(index);
+        }
+
+        public override string ToString()
+        {
+            var fullstring = string.Empty;
+            if (typeof(T).IsEnum)
+            {
+                var items = Collection.Select(x => (x as Enum).GetDescription()).ToList();
+
+                for (int i = 0; i < items.Count; i++)
+                {
+                    fullstring += items[i];
+                    if (i != items.Count - 1)
+                        fullstring += ", ";
+                }
+            }
+            else
+            {
+                for (int i = 0; i < Collection.Count; i++)
+                {
+                    fullstring += Collection[i].ToString();
+                    if (i != Collection.Count - 1)
+                        fullstring += ", ";
+                }
+            }
+            return fullstring;
         }
     }
 }

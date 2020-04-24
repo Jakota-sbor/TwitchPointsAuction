@@ -7,10 +7,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TwitchPointsAuction.Classes;
-using TwitchPointsAuction.Properties;
 
 namespace TwitchPointsAuction.Models
 {
+    [JsonObject]
     public class AuctionRulesModel : INotifyPropertyChanged
     {
         /*
@@ -65,16 +65,37 @@ namespace TwitchPointsAuction.Models
         private int? yearTo = null;
         private NotifyCollection<string> completedAnime = new NotifyCollection<string>();
         private NotifyCollection<Genres> forbiddenGenres = new NotifyCollection<Genres>();
-        private NotifyCollection<Kind> forbiddenTypes = new NotifyCollection<Kind>();
+        private NotifyCollection<Kind> forbiddenKinds = new NotifyCollection<Kind>();
         private NotifyCollection<string> forbiddenTitles = new NotifyCollection<string>();
+        private string auctionRulesText = null;
 
-        public int? YearFrom { get => yearFrom; set { yearFrom = value; OnPropertyChanged(); } }
-        public int? YearTo { get => yearTo; set { yearTo = value; OnPropertyChanged(); } }
+        public int? YearFrom { get => yearFrom; set {
+                if (!value.HasValue || (value.HasValue && value.Value == 0))
+                    yearFrom = value;
+                else if (value > yearTo)
+                    yearFrom = yearTo;
+                else if (value >= 0 && value <= DateTime.Now.Year)
+                    yearFrom = value;
+                else
+                    yearFrom = DateTime.MinValue.Year;
+
+                OnPropertyChanged(); } }
+        public int? YearTo { get => yearTo; set {
+                if (!value.HasValue || (value.HasValue && value.Value == 0))
+                    yearTo = value;
+                else if (value < yearFrom)
+                    yearTo = yearFrom;
+                else if (value >= 0 && value <= DateTime.Now.Year)
+                    yearTo = value;
+                else
+                    yearTo = DateTime.Now.Year;
+                OnPropertyChanged(); } }
         public NotifyCollection<string> CompletedAnime { get => completedAnime; set { completedAnime = value; OnPropertyChanged(); } }
-        public NotifyCollection<Genres> ForbiddenGenres { get => forbiddenGenres; set { forbiddenGenres = value; OnPropertyChanged(); } }
-        public NotifyCollection<Kind> ForbiddenTypes { get => forbiddenTypes; set { forbiddenTypes = value; OnPropertyChanged(); } }
+        public NotifyCollection<Genres> ForbiddenGenres { get => forbiddenGenres;  set { forbiddenGenres = value; OnPropertyChanged(); } }
+        public NotifyCollection<Kind> ForbiddenKinds { get => forbiddenKinds; set { forbiddenKinds = value; OnPropertyChanged(); } }
         public NotifyCollection<string> ForbiddenTitles { get => forbiddenTitles; set { forbiddenTitles = value; OnPropertyChanged(); } }
-        
+        public string AuctionRulesText { get => auctionRulesText; set { auctionRulesText = value; OnPropertyChanged(); } }
+
         public bool IsEnabled { get; set; } = true;
 
         public AuctionRulesModel()
@@ -95,36 +116,6 @@ namespace TwitchPointsAuction.Models
             //Debug.WriteLine(forbiddenGenresJson);
         }
 
-        private RelayCommand addGenreCommand;
-        public RelayCommand AddGenreCommand
-        {
-            get
-            {
-                return addGenreCommand ??
-                    (addGenreCommand = new RelayCommand(param =>
-                    {
-                        Debug.WriteLine("add forb genre: " + ((Genres)param).ToString());
-                        var genre = (Genres)param;
-                        ForbiddenGenres.Add(genre);
-                    }));
-            }
-        }
-
-        private RelayCommand removeGenreCommand;
-        public RelayCommand RemoveGenreCommand
-        {
-            get
-            {
-                return removeGenreCommand ??
-                    (removeGenreCommand = new RelayCommand(param =>
-                    {
-                        Debug.WriteLine("remove forb genre: " + ((Genres)param).ToString());
-                        var genre = (Genres)param;
-                        ForbiddenGenres.Remove(genre);
-                    }));
-            }
-        }
-
         public (bool, BetError) IsInvalid(AnimeData anime)
         {
             if (!IsEnabled)
@@ -132,26 +123,28 @@ namespace TwitchPointsAuction.Models
             else
             {
                 bool InvalidName, InvalidDate, InvalidKind, InvalidGenres, Completed;
-                var error = BetError.None;
-                Debug.WriteLine("ANIME ID: " + anime.ID);
-                Debug.WriteLine("COMPLETED ANIME: " + CompletedAnime.Count);
                 Completed = CompletedAnime.Any(x => x == anime.ID);
-                InvalidDate = (YearFrom.HasValue && anime.AiredDate.Year < YearFrom) || (YearTo.HasValue && anime.AiredDate.Year > YearTo);
-                InvalidName = ForbiddenTitles.Any(x => anime.NameRus.ToUpper().Contains(x.ToUpper()));
-                InvalidKind = ForbiddenTypes.Any(x => x == anime.Kind);
-                InvalidGenres = ForbiddenGenres.Any(x => anime.Genres.Contains(x));
                 if (Completed)
-                    error = BetError.Completed;
-                else if (InvalidDate)
-                    error = BetError.InvalidDate;
-                else if (InvalidName)
-                    error = BetError.InvalidName;
-                else if (InvalidKind)
-                    error = BetError.InvalidKind;
-                else if (InvalidGenres)
-                    error = BetError.InvalidGenre;
-                return (Completed || InvalidDate || InvalidName || InvalidKind || InvalidGenres,
-                        error);
+                    return (true, BetError.Completed);
+                InvalidDate = (YearFrom.HasValue && anime.AiredDate.Year < YearFrom) || (YearTo.HasValue && anime.AiredDate.Year > YearTo);
+                if (InvalidDate)
+                    return (true,BetError.InvalidDate);
+                foreach (var item in ForbiddenKinds)
+                {
+                    Debug.WriteLine("FORB KIND: " + item.ToString());
+                }
+                Debug.WriteLine("ANIME KIND: " + anime.Kind.ToString());
+                InvalidKind = ForbiddenKinds.Any(x => x.Equals(anime.Kind));
+                if (InvalidKind)
+                    return (true, BetError.InvalidKind);
+                InvalidGenres = ForbiddenGenres.Any(x => anime.Genres.Contains(x));
+                if (InvalidGenres)
+                    return (true, BetError.InvalidGenre);
+                InvalidName = ForbiddenTitles.Any(x => anime.NameRus.ToUpper().Split(" ").Contains(x.ToUpper()));
+                if (InvalidName)
+                    return (true, BetError.InvalidName);
+
+                return (false, BetError.None);
             }
         }
 

@@ -28,12 +28,12 @@ namespace TwitchPointsAuction.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public IrcChatSettings TwitchIrcSettings
+        [global::System.Configuration.DefaultSettingValueAttribute(null)]
+        public string TwitchIrcSettings
         {
             get
             {
-                return ((IrcChatSettings)(this["TwitchIrcSettings"]));
+                return ((string)(this["TwitchIrcSettings"]));
             }
             set
             {
@@ -43,12 +43,12 @@ namespace TwitchPointsAuction.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public PubSubSettings TwitchPubSubSettings
+        [global::System.Configuration.DefaultSettingValueAttribute(null)]
+        public string TwitchPubSubSettings
         {
             get
             {
-                return ((PubSubSettings)(this["TwitchPubSubSettings"]));
+                return ((string)(this["TwitchPubSubSettings"]));
             }
             set
             {
@@ -58,12 +58,12 @@ namespace TwitchPointsAuction.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public AuctionSettingsModel DefaultAuctionSettings
+        [global::System.Configuration.DefaultSettingValueAttribute(null)]
+        public string DefaultAuctionSettings
         {
             get
             {
-                return ((AuctionSettingsModel)(this["DefaultAuctionSettings"]));
+                return ((string)(this["DefaultAuctionSettings"]));
             }
             set
             {
@@ -73,12 +73,12 @@ namespace TwitchPointsAuction.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public AuctionRulesModel DefaultAuctionRules
+        [global::System.Configuration.DefaultSettingValueAttribute(null)]
+        public string DefaultAuctionRules
         {
             get
             {
-                return ((AuctionRulesModel)(this["DefaultAuctionRules"]));
+                return ((string)(this["DefaultAuctionRules"]));
             }
             set
             {

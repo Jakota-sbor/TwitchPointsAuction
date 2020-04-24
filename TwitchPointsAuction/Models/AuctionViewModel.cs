@@ -8,31 +8,36 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Threading;
 using TwitchPointsAuction.Classes;
-using TwitchPointsAuction.Properties;
 
 namespace TwitchPointsAuction.Models
 {
     public class AuctionViewModel : INotifyPropertyChanged
-    {
+    { 
+
+        public Settings UserSettings
+        {
+            get { return Settings.Instance; }
+        }
+
         private Regex ShikiAnimeIDRegex = new Regex(@"shikimori\.one\/animes\/(z?\d+)\S*", RegexOptions.Compiled);
         private object itemslock = new object();
         private IrcChat TwitchChat;
         private PubSub TwitchPubSub;
+        private string auctionElementLeader = null;
 
         public AuctionModel Auction { get; set; }
         public NotifyCollection<AuctionElementViewModel> AuctionElements { get; set; }
+        public string AuctionElementLeader { get => auctionElementLeader; set { auctionElementLeader = value; OnPropertyChanged(); } }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName]string prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
 
         public event EventHandler<BetError> OnBetErrorEvent;
-
-        private SolidColorBrush windowBackgroudColor = new SolidColorBrush(Colors.White);
-        private SolidColorBrush textForegroundColor = new SolidColorBrush(Colors.Black);
-
-        public SolidColorBrush WindowBackgroudColor { get => windowBackgroudColor; set { windowBackgroudColor = value; Debug.WriteLine("NEW Background: " + value.Color.ToString()); OnPropertyChanged(); } }
-        public SolidColorBrush TextForegroundColor { get => textForegroundColor; set { textForegroundColor = value; OnPropertyChanged(); } }
 
         private RelayCommand toggleChatCommand;
         public RelayCommand ToggleChatCommand
@@ -97,35 +102,8 @@ namespace TwitchPointsAuction.Models
 
         bool IsInitialized = false;
 
-        /*
-public AuctionViewModel()
-{
-AuctionElements = new NotifyCollection<AuctionElementViewModel>()
-{
-new AuctionElementViewModel(),
-new AuctionElementViewModel(),
-new AuctionElementViewModel(),
-new AuctionElementViewModel(),
-new AuctionElementViewModel()
-};
-Auction = new AuctionModel(TimeSpan.FromMinutes(10));
-AuctionSettings = new AuctionSettingsModel();
-AuctionRules = new AuctionRulesModel();
-}
-*/
         public AuctionViewModel()
         {
-            Properties.UserSettings.Default.TwitchIrcSettings = Properties.UserSettings.Default.TwitchIrcSettings ?? new IrcChatSettings();
-            Properties.UserSettings.Default.TwitchPubSubSettings = Properties.UserSettings.Default.TwitchPubSubSettings ?? new PubSubSettings();
-            Properties.UserSettings.Default.DefaultAuctionSettings = Properties.UserSettings.Default.DefaultAuctionSettings ?? new AuctionSettingsModel();
-            Properties.UserSettings.Default.DefaultAuctionRules = Properties.UserSettings.Default.DefaultAuctionRules ?? new AuctionRulesModel();
-
-            /*
-            IrcSettings = Properties.UserSettings.Default.TwitchIrcSettings ?? new IrcChatSettings();
-            PubSettings = Properties.UserSettings.Default.TwitchPubSubSettings ?? new PubSubSettings();
-            AuctionSettings = Properties.UserSettings.Default.DefaultAuctionSettings ?? new AuctionSettingsModel();
-            AuctionRules = Properties.UserSettings.Default.DefaultAuctionRules ?? new AuctionRulesModel();
-            */
             TwitchChat = new IrcChat();
             TwitchPubSub = new PubSub();
             AuctionElements = new NotifyCollection<AuctionElementViewModel>();
@@ -169,28 +147,6 @@ AuctionRules = new AuctionRulesModel();
         {
             TwitchChat?.Disconnect();
             Auction?.Dispose();
-            /*
-            Properties.UserSettings.Default.TwitchIrcSettings = IrcSettings;
-            Properties.UserSettings.Default.TwitchPubSubSettings = PubSettings;
-            Properties.UserSettings.Default.DefaultAuctionSettings = AuctionSettings;
-            Properties.UserSettings.Default.DefaultAuctionRules = AuctionRules;
-            */
-            Properties.UserSettings.Default.Save();
-        }
-
-        public async Task Initialize()
-        {
-            //await Parsing.Initialize();
-
-            /*
-            var animeData = await Requests.GetAnimeData("38668");
-            var IsInvalid = AuctionElemValidation.IsInvalid(animeData.Item1).Item1;
-            if (!IsInvalid)
-            {
-                lock (itemslock)
-                    AuctionElements.Add(new AuctionElementViewModel("38668", animeData.Item1));
-            }
-            */
         }
 
         private async void PubSub_OnReward(object sender, Reward newReward)
@@ -236,12 +192,18 @@ AuctionRules = new AuctionRulesModel();
         {
             try
             {
-                if (e.PropertyName == "TotalBet" && Auction.CurrentTimeLeft < Properties.UserSettings.Default.DefaultAuctionSettings.DefaultAuctionMinAddTime)
+                if (e.PropertyName == "TotalBet")
                 {
-                    var elem = (AuctionElementViewModel)sender;
-                    var otherelems = AuctionElements.Where(x => x.Index != elem.Index);
-                    if (otherelems.Count() > 0 && elem.TotalBet > otherelems.Max(x => x.TotalBet))
-                        Auction.AddTime(Properties.UserSettings.Default.DefaultAuctionSettings.DefaultAdditionalTime);
+                    if (Auction.CurrentTimeLeft <= Settings.Instance.AuctionSettings.DefaultAuctionThresholdTime)
+                    {
+                        var elem = (AuctionElementViewModel)sender;
+                        var otherelems = AuctionElements.Where(x => x.Index != elem.Index);
+                        if (otherelems.Count() > 0 && elem.TotalBet > otherelems.Max(x => x.TotalBet))
+                        {
+                            Debug.WriteLine("ADD TIME!");
+                            Auction.AddAuctionTime(Settings.Instance.AuctionSettings.DefaultAdditionalTime);
+                        }
+                    }
                 }
             }
             catch { }
@@ -252,23 +214,26 @@ AuctionRules = new AuctionRulesModel();
             try
             {
                 Debug.WriteLine("Create new element!");
-                var animeData = await Requests.GetAnimeData(animeId);
-                var IsInvalid = Properties.UserSettings.Default.DefaultAuctionRules.IsInvalid(animeData.Item1);
-                if (!IsInvalid.Item1)
+                if (!Settings.Instance.AuctionSettings.MaxAuctionElements.HasValue
+                    || (Settings.Instance.AuctionSettings.MaxAuctionElements.HasValue && AuctionElements.Count < Settings.Instance.AuctionSettings.MaxAuctionElements.Value))
                 {
-                    AuctionElements.Add(new AuctionElementViewModel(AuctionElements.Count + 1, animeId, animeData.Item1));
-                    return AuctionElements[^1];
+                    var animeData = await Requests.GetAnimeData(animeId);
+                    var IsInvalid = Settings.Instance.AuctionRules.IsInvalid(animeData.Item1);
+                    Debug.WriteLine("IsInValid? " + IsInvalid);
+                    if (!IsInvalid.Item1)
+                    {
+                        Debug.WriteLine("Add new item!");
+                        AuctionElements.Add(new AuctionElementViewModel(AuctionElements.Count + 1, animeId, animeData.Item1));
+                        return AuctionElements[^1];
+                    }
+                    else
+                        OnBetErrorEvent?.Invoke(this, IsInvalid.Item2);
+                    return null;
                 }
-                else
-                    OnBetErrorEvent?.Invoke(this, IsInvalid.Item2);
                 return null;
             }
             catch
             { return null; }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged([CallerMemberName]string prop = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-
     }
 }

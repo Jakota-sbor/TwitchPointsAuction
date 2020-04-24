@@ -24,6 +24,29 @@ namespace TwitchPointsAuction.Classes
             int episodes = int.TryParse((string)jsonO["episodes"], out episodes) ? episodes : 0;
             var posterUri = new Uri("https://shikimori.one" + (string)jsonO["image"]["original"], UriKind.Absolute);
             var status = (string)jsonO["status"] == "released" ? Status.Released : Status.Ongoing;
+            var kind = Kind.Special;
+            switch ((string)jsonO["kind"])
+            {
+                case "tv":
+                kind = Kind.TV;
+                    break;
+                case "ova":
+                    kind = Kind.OVA;
+                    break;
+                case "ona":
+                    kind = Kind.ONA;
+                    break;
+                case "movie":
+                    kind = Kind.Movie;
+                    break;
+                case "special":
+                    kind = Kind.Special;
+                    break;
+                default:
+                    kind = Kind.Special;
+                    break;
+            }
+            
             DateTime airedDate = DateTime.TryParse((string)jsonO["aired_on"], out airedDate) ? airedDate : DateTime.Now;
             var genres = jsonO["genres"] != null ? (from genre in jsonO["genres"].Children() select Enum.TryParse(typeof(Genres), (string)genre["russian"], out var genreenum) ? (Genres)genreenum : Genres.Shonen) : null;
             return new AnimeData
@@ -36,12 +59,13 @@ namespace TwitchPointsAuction.Classes
                 PosterUri = posterUri,
                 Status = status,
                 AiredDate = airedDate,
-                Genres = genres
+                Genres = genres,
+                Kind = kind
             };
 
         }
 
-        public static ICollection<string> ParseListAnimeData(string jsonString)
+        public static IList<string> ParseListAnimeData(string jsonString)
         {
             List<string> AnimeList = new List<string>();
             var results = JArray.Parse(jsonString);

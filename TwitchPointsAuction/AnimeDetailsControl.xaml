@@ -12,9 +12,11 @@
     <UserControl.Resources>
         <classes:GenresToStringConverter x:Key="GenresToString"/>
         <Style TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="Tahoma"/>
-            <Setter Property="Foreground" Value="WhiteSmoke"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontWeight" Value="Thin"/>
+            <Setter Property="Foreground" Value="Black"/>
             <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="3"/>
         </Style>
         <Storyboard x:Key="moveAnimation">
             <DoubleAnimation To="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Duration="0:0:5" RepeatBehavior="1x" AutoReverse="True"  
@@ -22,32 +24,32 @@
         </Storyboard>
         <Storyboard x:Key="showPosterStoryboard">
             <DoubleAnimationUsingKeyFrames
-                Storyboard.TargetName="grid_PosterTitle"
+                Storyboard.TargetName="grid_Poster"
                 Storyboard.TargetProperty="Opacity"
                 Duration="0:0:26"
                 RepeatBehavior="Forever">
                 <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:0" />
                 <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1" />
-                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:11" />
-                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:12" />
+                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:6" />
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:7" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="grid_Details"
                 Storyboard.TargetProperty="Opacity"
                 Duration="0:0:26"
                 RepeatBehavior="Forever">
-                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:12" />
-                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:13" />
-                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:18" />
-                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:19" />
+                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:7" />
+                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:8" />
+                <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:13" />
+                <LinearDoubleKeyFrame Value="0" KeyTime="0:0:14" />
             </DoubleAnimationUsingKeyFrames>
             <DoubleAnimationUsingKeyFrames
                 Storyboard.TargetName="grid_Description"
                 Storyboard.TargetProperty="Opacity"
                 Duration="0:0:26"
                 RepeatBehavior="Forever">
-                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:19" />
-                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:20" />
+                <DiscreteDoubleKeyFrame Value="0" KeyTime="0:0:14" />
+                <LinearDoubleKeyFrame Value="1" KeyTime="0:0:15" />
                 <DiscreteDoubleKeyFrame Value="1" KeyTime="0:0:25" />
                 <LinearDoubleKeyFrame Value="0" KeyTime="0:0:26" />
             </DoubleAnimationUsingKeyFrames>
@@ -77,23 +79,26 @@
             -->
         </i:Interaction.Triggers>
         <Grid>
-            <Grid x:Name="grid_Details" Opacity="0"  RenderTransformOrigin="0.5,0.5" Margin="5">
-                <WrapPanel Orientation="Vertical" Name="panel_Info" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Center" >
-                    
-                    <!-- Binding AnimeContent.PosterUri-->
-                    <TextBlock Name="textblock_Kind" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
-                               Text="{Binding AnimeContent.Kind, FallbackValue='Тип: ТВ', StringFormat='Тип: {0}'}"/>
-                    <TextBlock Name="textblock_ReleaseDate" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
-                               Text="{Binding AnimeContent.AiredDate, FallbackValue='Дата: 10.10.1992', StringFormat='Дата: dd.MM.yyyy'}"/>
-                    <TextBlock Name="textblock_Episodes" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
-                               Text="{Binding AnimeContent.Episodes, FallbackValue='Эпизодов: 12', StringFormat='Эпизодов: {0}'}"/>
-                    <TextBlock Name="textblock_Genres"  TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Justify"
-                               Text="{Binding AnimeContent.Genres, FallbackValue='Жанры: Комедия, Школа, Романтика, Сверхъестественное', Converter={StaticResource GenresToString}, StringFormat='Жанры: {0}'}"/>
-                    <!--
+            <DockPanel  x:Name="grid_Details" Opacity="0" Margin="5" LastChildFill="True">
+                <TextBlock Name="textblock_Title" DockPanel.Dock="Top" FontSize="16" FontWeight="Bold"
+                               HorizontalAlignment="Stretch" VerticalAlignment="Center" 
+                               TextAlignment="Center"
+                               TextWrapping="WrapWithOverflow"
+                               Text="{Binding AnimeContent.NameRus, FallbackValue=''}"/>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                    <TextBlock Name="textblock_ReleaseDate" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
+                               Text="{Binding AnimeContent.AiredDate, FallbackValue='Дата: 10.10.2020', StringFormat='Дата: dd.MM.yyyy'}"/>
+                    <TextBlock Name="textblock_Genres"  TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
+                               Text="{Binding AnimeContent.Genres, FallbackValue='Жанры: комедия, романтика, экшен, приключения', Converter={StaticResource GenresToString}, StringFormat='Жанры: {0}'}"/>
+                    <TextBlock Name="textblock_Kind" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
+                               Text="{Binding AnimeContent.Kind, FallbackValue='', StringFormat='Тип: {0}'}"/>
+                    <TextBlock Name="textblock_Episodes" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
+                               Text="{Binding AnimeContent.Episodes, FallbackValue='', StringFormat='Эпизодов: {0}'}"/>
+                </StackPanel>
+                <!--
                 <TextBlock Name="textblock_Seasons" Text="{Binding SeasonsCount, StringFormat='Сезонов: {0}'}"/>
                 <TextBlock Name="textblock_Duration" Text="{Binding Duration, StringFormat='Время: {0} мин'}"/>
                 -->
-                </WrapPanel>
                 <!--
                 <Separator DockPanel.Dock="Top" Height="10"/>
                 -->
@@ -104,36 +109,20 @@
                     </i:DataTrigger>
                 </i:Interaction.Triggers>
                 -->
-                <Grid.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="1"/>
-                        <SkewTransform AngleY="0"/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </Grid.RenderTransform>
-            </Grid>
+            </DockPanel>
             <Grid Name="grid_Description" Opacity="0" RenderTransformOrigin="0.5,0.5" Margin="5">
                 <!--
                 <ScrollViewer Name="scroll_Description" VerticalScrollBarVisibility="Hidden" Margin="5">
                 -->
-                <TextBlock Name="textblock_Description" TextWrapping="Wrap" TextTrimming="WordEllipsis"  Text="{Binding AnimeContent.Description,FallbackValue='Ничем не примечательный школьник Сакута Адзусагава проводит всё своё свободное время в библиотеке. Однажды он встречает девушку в костюме кролика, которая старше его на год. Она представляется как Маи Сакурадзима — прославленная актриса и первая красавица школы. Девушка рассказывает, что все вокруг перестали «видеть» её, поэтому она оделась так вызывающе. По мнению Маи, всё это из-за загадочного «подросткового синдрома». Адзусагава, недолго думая, решает помочь Сакурадзиме в решении этой странной проблемы. Однако кто мог знать, чем это обернётся...'}"/>
+                <TextBlock Name="textblock_Description" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                           TextWrapping="Wrap"  TextTrimming="WordEllipsis"  TextAlignment="Justify"
+                           Text="{Binding AnimeContent.Description,FallbackValue='Ничем не примечательный школьник Сакута Адзусагава проводит всё своё свободное время в библиотеке. Однажды он встречает девушку в костюме кролика, которая старше его на год. Она представляется как Маи Сакурадзима — прославленная актриса и первая красавица школы. Девушка рассказывает, что все вокруг перестали «видеть» её, поэтому она оделась так вызывающе. По мнению Маи, всё это из-за загадочного «подросткового синдрома». Адзусагава, недолго думая, решает помочь Сакурадзиме в решении этой странной проблемы. Однако кто мог знать, чем это обернётся...'}"/>
             </Grid>
-            <Grid Name="grid_PosterTitle" Margin="5" RenderTransformOrigin="0.5,0.5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="3*"/>
-                </Grid.RowDefinitions>
+            <Grid Name="grid_Poster" Margin="5" RenderTransformOrigin="0.5,0.5">
                 <!--
                 {Binding TitlePosition, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}
                 -->
-                <TextBlock Grid.Row="0" Name="textblock_Title" Margin="3" FontSize="16"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                TextAlignment="Justify" TextTrimming="WordEllipsis" TextWrapping="WrapWithOverflow"
-                Text="{Binding AnimeContent.NameRus, FallbackValue='Этот глупый свин не понимает мечту девочки-зайки'}"/>
-                <Image Grid.Row="1" Name="image_Poster"
+                <Image Name="image_Poster"
                        Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Stretch" Source="{Binding AnimeContent.PosterUri}" Margin="3"/>
                 <Grid.RenderTransform>
                     <TransformGroup>
@@ -143,7 +132,6 @@
                         <TranslateTransform/>
                     </TransformGroup>
                 </Grid.RenderTransform>
-                
             </Grid>
         </Grid>
     </Border>

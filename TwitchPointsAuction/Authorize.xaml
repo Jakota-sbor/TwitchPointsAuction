@@ -1,0 +1,16 @@
+﻿<Window x:Class="TwitchPointsAuction.Authorize"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TwitchPointsAuction"
+        mc:Ignorable="d"
+        Title="Authorize" Height="300" Width="300" Loaded="Window_Loaded">
+    <Grid MouseLeftButtonDown="Grid_MouseLeftButtonDown">
+        <DockPanel  Name="panel_Login" LastChildFill="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TextBox x:Name="txtUrl" DockPanel.Dock="Top" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+            <Label  DockPanel.Dock="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="label_Loading" Background="#FFF"  Content="Загрузка..." FontSize="20" FontFamily="Lucida Fax,Arial" />
+            <WebBrowser DockPanel.Dock="Top" x:Name="webBrowser" Navigating="webBrowser_Navigating" Navigated="webBrowser_Navigated" ScrollViewer.HorizontalScrollBarVisibility="Auto" Loaded="webBrowser_Loaded"/>
+        </DockPanel>
+    </Grid>
+</Window>
