@@ -15,6 +15,12 @@ namespace TwitchPointsAuction.Classes
 {
     public class PubSub
     {
+        private static PubSub instance;
+        public static PubSub Instance
+        {
+            get { Debug.WriteLine("Instanse null? {0}", instance == null); return instance ?? (instance = new PubSub()); }
+        }
+
         public event OnRewardHandler OnReward;
 
         private Timer PubSubPingTimer;
@@ -27,7 +33,7 @@ namespace TwitchPointsAuction.Classes
                 {
                     Options =
                     {
-                        KeepAliveInterval = TimeSpan.FromSeconds(5),
+                        KeepAliveInterval = TimeSpan.FromSeconds(60),
                     }
                 };
                 //client.Options.SetRequestHeader("Origin", "xxx");
@@ -68,9 +74,8 @@ namespace TwitchPointsAuction.Classes
                 };
 
                 PubSubPingTimer = new Timer(new TimerCallback(SendingPing), Client, 0, 5000);
-                Subscribe();
-
                 await Client.Start();
+                Subscribe();
                 return true;
             }
             catch
@@ -142,7 +147,7 @@ namespace TwitchPointsAuction.Classes
         {
             try
             {
-                if (Client.IsRunning)
+                if (Client != null && Client.IsRunning)
                 {
                     string userid = (await Requests.GetUserID(channel)).Item1;
                     Client.Send((JObject.FromObject(new
@@ -164,25 +169,29 @@ namespace TwitchPointsAuction.Classes
         {
             try
             {
-                Client.ReconnectionHappened.Subscribe(type =>
+                if (Client != null && Client.IsRunning)
                 {
-                    Debug.WriteLine($"Reconnection happened, type: {type}, url: {Client.Url}");
-                });
-                Client.DisconnectionHappened.Subscribe(info =>
-                {
-                    Debug.WriteLine($"Disconnection happened, type: {info.Type}");
-                });
-
-                Client.MessageReceived.Subscribe(msg =>
-                {
-                    Debug.WriteLine($"Message received: {msg}");
-                    var jObject = JObject.Parse(msg.Text);
-                    if ((string)jObject["type"] == "MESSAGE" && jObject["data"] != null)
+                    Client.ReconnectionHappened.Subscribe(type =>
                     {
-                        var newReward = JsonParser.ParseReward(((string)jObject["data"]["message"]).Replace('\\', Char.MinValue));
-                        OnReward?.Invoke("twitch", newReward);
-                    }
-                });
+                        Debug.WriteLine($"Reconnection happened, type: {type}, url: {Client.Url}");
+                    });
+
+                    Client.DisconnectionHappened.Subscribe(info =>
+                    {
+                        Debug.WriteLine($"Disconnection happened, type: {info.Type}");
+                    });
+
+                    Client.MessageReceived.Subscribe(msg =>
+                    {
+                        Debug.WriteLine($"Message received: {msg}");
+                        var jObject = JObject.Parse(msg.Text);
+                        if ((string)jObject["type"] == "MESSAGE" && jObject["data"] != null)
+                        {
+                            var newReward = JsonParser.ParseReward(((string)jObject["data"]["message"]).Replace('\\', Char.MinValue));
+                            OnReward?.Invoke("twitch", newReward);
+                        }
+                    });
+                }
             }
             catch { }
         }

@@ -51,8 +51,10 @@ namespace TwitchPointsAuction.Classes
             var collectionType = (CollectionType)parameter;
             switch (collectionType)
             {
+                case CollectionType.Apis:
+                    return Settings.Instance.AuctionSettings.AllowApiTypes.Any(x => x == (ApiType)value);
                 case CollectionType.Genres:
-                    return Settings.Instance.AuctionRules.ForbiddenGenres.Any(x => x == (Genres)value);
+                    return Settings.Instance.AuctionRules.ForbiddenGenres.Any(x => x == (AnimeGenres)value);
                 case CollectionType.Kinds:
                     return Settings.Instance.AuctionRules.ForbiddenKinds.Any(x => x == (Kind)value);
                 case CollectionType.Titles:
@@ -77,7 +79,7 @@ namespace TwitchPointsAuction.Classes
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (!string.IsNullOrEmpty((string)value))
-                return int.TryParse((string)value, out var val) ? val : 0;
+                return int.TryParse(((string)value).Replace(" ", string.Empty), out var val) ? val : 0;
             else return null;
         }
     }
@@ -213,7 +215,7 @@ namespace TwitchPointsAuction.Classes
                 var text = (string)values[0];
                 var yearFrom = (int?)values[1];
                 var yearTo = (int?)values[2];
-                var genres = (NotifyCollection<Genres>)values[3];
+                var genres = (NotifyCollection<AnimeGenres>)values[3];
                 var kinds = (NotifyCollection<Kind>)values[4];
                 var titles = (NotifyCollection<string>)values[5];
 

@@ -92,7 +92,6 @@ namespace TwitchPointsAuction
                 };
                 Process.Start(psi);
             }
-
         }
 
         private void button_PubSubLogin_Click(object sender, RoutedEventArgs e)

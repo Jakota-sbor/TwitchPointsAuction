@@ -16,18 +16,18 @@ using TwitchPointsAuction.Models;
 namespace TwitchPointsAuction
 {
     /// <summary>
-    /// Логика взаимодействия для AnimeDetailsControl.xaml
+    /// Логика взаимодействия для AuctionLotControl.xaml
     /// </summary>
-    public partial class AnimeDetailsControl : UserControl
+    public partial class AuctionLotControl : UserControl
     {
-        public static readonly DependencyProperty AnimeContentProperty = DependencyProperty.Register("AnimeContent", typeof(AnimeData), typeof(AnimeDetailsControl), new PropertyMetadata(new AnimeData()));
-        public static readonly DependencyProperty IsShowPosterProperty = DependencyProperty.Register("IsShowPoster", typeof(bool), typeof(AnimeDetailsControl), new PropertyMetadata(false));
-        public static readonly DependencyProperty TitlePositionProperty = DependencyProperty.Register("TitlePosition", typeof(Dock), typeof(AnimeDetailsControl), new PropertyMetadata(Dock.Top));
+        public static readonly DependencyProperty LotContentProperty = DependencyProperty.Register("LotContent", typeof(LotData), typeof(AuctionLotControl), new PropertyMetadata(null));
+        public static readonly DependencyProperty IsShowPosterProperty = DependencyProperty.Register("IsShowPoster", typeof(bool), typeof(AuctionLotControl), new PropertyMetadata(false));
+        public static readonly DependencyProperty TitlePositionProperty = DependencyProperty.Register("TitlePosition", typeof(Dock), typeof(AuctionLotControl), new PropertyMetadata(Dock.Top));
 
-        public AnimeData AnimeContent
+        public LotData LotContent
         {
-            get { return (AnimeData)GetValue(AnimeContentProperty); }
-            set { SetValue(AnimeContentProperty, value); }
+            get { return (LotData)GetValue(LotContentProperty); }
+            set { SetValue(LotContentProperty, value); }
         }
 
         public bool IsShowPoster
@@ -42,7 +42,7 @@ namespace TwitchPointsAuction
             set { SetValue(TitlePositionProperty, value); System.Diagnostics.Trace.WriteLine("DOCK CHANGED"); }
         }
 
-        public AnimeDetailsControl()
+        public AuctionLotControl()
         {
             InitializeComponent();
         }

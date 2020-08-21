@@ -5,6 +5,22 @@ using System.Text;
 
 namespace TwitchPointsAuction.Classes
 {
+    public enum ApiType : int
+    {
+        [Description("Обычный текст")]
+        Text = 0,
+        [Description("Номер лота")]
+        ID,
+        [Description("Ссылка Steam")]
+        Steam,
+        [Description("Ссылка PS Store")]
+        PSStore,
+        [Description("Ссылка Kinopoisk")]
+        Kinopoisk,
+        [Description("Ссылка Shikimori")]
+        Shikimori
+    }
+
     public enum CollectionType : int
     {
         [Description("Жанры")]
@@ -15,6 +31,8 @@ namespace TwitchPointsAuction.Classes
         Rating,
         [Description("Тайтлы")]
         Titles,
+        [Description("Доступные API")]
+        Apis
     }
 
     public enum AuctionEvent : int
@@ -35,98 +53,194 @@ namespace TwitchPointsAuction.Classes
 
     public enum Status : int
     {
+        [Description("Не вышло")]
+        NotReleased = 0,
         [Description("Законченное")]
-        Released = 0,
+        Released,
         [Description("Незаконченное (онгоинг)")]
         Ongoing
     }
-    public enum Genres : int
+
+    public enum AnimeGenres : int
     {
-        [Description("Сёнен")]
-        Shonen = 0,
-        [Description("Сёнен-ай")]
-        Shounen_ai,
-        [Description("Сейнен")]
-        Seinen,
-        [Description("Сёдзё")]
-        Shoujo,
-        [Description("Сёдзё-ай")]
-        Shoujo_ai,
-        [Description("Дзёсей")]
-        Josei,
+        [Description("Все")]
+        None = 0,
+        [Description("Экшен")]
+        Action,
+        [Description("Приключения")]
+        Adventure,
+        [Description("Машины")]
+        Vehicles,
         [Description("Комедия")]
         Comedy,
-        [Description("Романтика")]
-        Romance,
-        [Description("Школа")]
-        School,
         [Description("Безумие")]
         Madness,
-        [Description("Боевые искусства")]
-        MartialArts,
-        [Description("Вампиры")]
-        Vampire,
-        [Description("Военное")]
-        Military,
-        [Description("Гарем")]
-        Harem,
         [Description("Демоны")]
         Demons,
         [Description("Детектив")]
         Detective,
-        [Description("Детское")]
-        Kids,
         [Description("Драма")]
         Drama,
+        [Description("Этти")]
+        Ecchi,
+        [Description("Фэнтези")]
+        Fantasy,
         [Description("Игры")]
         Game,
+        [Description("Хентай")]
+        Hentai,
         [Description("Исторический")]
-        Historical,   
-        [Description("Космос")]
-        Space,
+        Historical,
+        [Description("Ужасы")]
+        Horror,
+        [Description("Детское")]
+        Kids,
         [Description("Магия")]
         Magic,
-        [Description("Машины")]
-        Vehicles,
+        [Description("Боевые искусства")]
+        MartialArts,
+        [Description("Военное")]
+        Military,
         [Description("Меха")]
         Mecha,
         [Description("Музыка")]
         Music,
         [Description("Пародия")]
         Parody,
+        [Description("Самураи")]
+        Samurai,
+
+        [Description("Сёдзё-ай")]
+        Shoujo_ai,
+        [Description("Дзёсей")]
+        Josei,
+        [Description("Романтика")]
+        Romance,
+        [Description("Школа")]
+        School,
+        [Description("Вампиры")]
+        Vampire,
+        [Description("Гарем")]
+        Harem,
+        [Description("Космос")]
+        Space,
+        [Description("Сёдзё")]
+        Shoujo,
         [Description("Повседневность")]
         SliceOfLife,
         [Description("Полиция")]
         Police,
-        [Description("Приключения")]
-        Adventure,
+        [Description("Сёнен")]
+        Shonen,
+        [Description("Сёнен-ай")]
+        Shounen_ai,
         [Description("Психологическое")]
         Psychological,
-        [Description("Самураи")]
-        Samurai,
         [Description("Сверхъестественное")]
         Supernatural,
         [Description("Спорт")]
         Sport,
         [Description("Супер сила")]
         SuperPower,
-        [Description("Ужасы")]
-        Horror,
         [Description("Фантастика")]
         Sci_Fi,
-        [Description("Фэнтези")]
-        Fantasy,
-        [Description("Экшен")]
-        Action,
-        [Description("Этти")]
-        Ecchi,
         [Description("Триллер")]
         Thriller,
-        [Description("Хентай")]
-        Hentai,
         [Description("Яой")]
         Yaoi,
+        [Description("Сейнен")]
+        Seinen,
         [Description("Юри")]
+        Yuri
+    }
+
+    public enum SteamGenres : int
+    {
+        [Description("Нет")]
+        None = 0,
+        [Description("Экшены")]
+        Actions=1,
+        [Description("Стратегии")]
+        Strategy,
+        [Description("")]
+        E2,
+        [Description("Казуальные")]
+        Casual,
+        [Description("")]
+        E3,
+        [Description("")]
+        E4,
+        [Description("")]
+        E5,
+        [Description("")]
+        E6,
+        [Description("Гонки")]
+        Racing,
+        [Description("")]
+        E8,
+        [Description("")]
+        E9,
+        [Description("")]
+        E10,
+        [Description("")]
+        E11,
+        [Description("")]
+        E12,
+        [Description("")]
+        E13,
+        [Description("")]
+        E14,
+        [Description("")]
+        E15,
+        [Description("Спортивные")]
+        Sports,
+        [Description("")]
+        E17,
+        [Description("")]
+        E18,
+        [Description("")]
+        E19,
+        [Description("")]
+        E20,
+        [Description("")]
+        E21,
+        [Description("")]
+        E22,
+        [Description("Приключения")]
+        Adventure,
+        [Description("")]
+        SliceOfLife,
+        [Description("")]
+        Police,
+        [Description("Симуляторы")]
+        Simulators,
+        [Description("")]
+        Psychological,
+        [Description("")]
+        Samurai,
+        [Description("")]
+        Supernatural,
+        [Description("")]
+        Sport,
+        [Description("")]
+        SuperPower,
+        [Description("")]
+        Horror,
+        [Description("")]
+        Sci_Fi,
+        [Description("")]
+        Fantasy,
+        [Description("Бесплатно")]
+        FreeToPlay,
+        [Description("")]
+        Ecchi,
+        [Description("")]
+        Thriller,
+        [Description("")]
+        Hentai,
+        [Description("")]
+        Yaoi,
+        [Description("")]
         Yuri
     }
 

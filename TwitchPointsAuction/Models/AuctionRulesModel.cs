@@ -64,7 +64,7 @@ namespace TwitchPointsAuction.Models
         private int? yearFrom = null;
         private int? yearTo = null;
         private NotifyCollection<string> completedAnime = new NotifyCollection<string>();
-        private NotifyCollection<Genres> forbiddenGenres = new NotifyCollection<Genres>();
+        private NotifyCollection<AnimeGenres> forbiddenGenres = new NotifyCollection<AnimeGenres>();
         private NotifyCollection<Kind> forbiddenKinds = new NotifyCollection<Kind>();
         private NotifyCollection<string> forbiddenTitles = new NotifyCollection<string>();
         private string auctionRulesText = null;
@@ -91,7 +91,7 @@ namespace TwitchPointsAuction.Models
                     yearTo = DateTime.Now.Year;
                 OnPropertyChanged(); } }
         public NotifyCollection<string> CompletedAnime { get => completedAnime; set { completedAnime = value; OnPropertyChanged(); } }
-        public NotifyCollection<Genres> ForbiddenGenres { get => forbiddenGenres;  set { forbiddenGenres = value; OnPropertyChanged(); } }
+        public NotifyCollection<AnimeGenres> ForbiddenGenres { get => forbiddenGenres;  set { forbiddenGenres = value; OnPropertyChanged(); } }
         public NotifyCollection<Kind> ForbiddenKinds { get => forbiddenKinds; set { forbiddenKinds = value; OnPropertyChanged(); } }
         public NotifyCollection<string> ForbiddenTitles { get => forbiddenTitles; set { forbiddenTitles = value; OnPropertyChanged(); } }
         public string AuctionRulesText { get => auctionRulesText; set { auctionRulesText = value; OnPropertyChanged(); } }
@@ -116,7 +116,7 @@ namespace TwitchPointsAuction.Models
             //Debug.WriteLine(forbiddenGenresJson);
         }
 
-        public (bool, BetError) IsInvalid(AnimeData anime)
+        public (bool, BetError) IsInvalid(ShikimoriLot anime)
         {
             if (!IsEnabled)
                 return (false, BetError.None);
@@ -126,7 +126,7 @@ namespace TwitchPointsAuction.Models
                 Completed = CompletedAnime.Any(x => x == anime.ID);
                 if (Completed)
                     return (true, BetError.Completed);
-                InvalidDate = (YearFrom.HasValue && anime.AiredDate.Year < YearFrom) || (YearTo.HasValue && anime.AiredDate.Year > YearTo);
+                InvalidDate = (YearFrom.HasValue && anime.ReleaseDate.Year < YearFrom) || (YearTo.HasValue && anime.ReleaseDate.Year > YearTo);
                 if (InvalidDate)
                     return (true,BetError.InvalidDate);
                 foreach (var item in ForbiddenKinds)
@@ -140,7 +140,7 @@ namespace TwitchPointsAuction.Models
                 InvalidGenres = ForbiddenGenres.Any(x => anime.Genres.Contains(x));
                 if (InvalidGenres)
                     return (true, BetError.InvalidGenre);
-                InvalidName = ForbiddenTitles.Any(x => anime.NameRus.ToUpper().Split(" ").Contains(x.ToUpper()));
+                InvalidName = ForbiddenTitles.Any(x => anime.Name.ToUpper().Split(" ").Contains(x.ToUpper()));
                 if (InvalidName)
                     return (true, BetError.InvalidName);
 

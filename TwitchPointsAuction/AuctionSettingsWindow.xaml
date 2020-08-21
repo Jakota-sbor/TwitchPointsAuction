@@ -11,10 +11,16 @@
         mc:Ignorable="d"
         Title="Настройки" Height="600" Width="800" Closing="Window_Closing">
     <Window.Resources>
+        <ObjectDataProvider x:Key="ApisEnum" MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="classes:ApiType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <ObjectDataProvider x:Key="GenresEnum" MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
             <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="classes:Genres"/>
+                <x:Type TypeName="classes:AnimeGenres"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
         <ObjectDataProvider x:Key="KindsEnum" MethodName="GetValues"
@@ -27,11 +33,17 @@
         <classes:EnumToStringConverter x:Key="EnumToString"/>
         <classes:IntToStringConverter x:Key="IntToString"/>
         <classes:StringToTimeSpanConverter x:Key="StringToTimeSpan"/>
+        <Style TargetType="GroupBox">
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="BorderBrush" Value="LightBlue"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+
         <Style TargetType="Button">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
             <Setter Property="FontStyle" Value="Normal"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontWeight" Value="Regular"/>
             <Setter Property="BorderBrush" Value="LightGray"/>
             <Setter Property="BorderThickness" Value="2"/>
             <Setter Property="Margin" Value="3"/>
@@ -42,7 +54,8 @@
             <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
             <Setter Property="FontStyle" Value="Normal"/>
             <Setter Property="FontWeight" Value="Regular"/>
-            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
         <Style TargetType="TextBlock" x:Key="TabHeader">
             <Setter Property="Foreground" Value="Black"/>
@@ -52,13 +65,28 @@
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="3"/>
         </Style>
+        <Style TargetType="CheckBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="BorderBrush" Value="LightBlue"/>
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="ToolTipService.IsEnabled" Value="False"/>
+            <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
+            <Setter Property="ToolTipService.InitialShowDelay" Value="0"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+        </Style>
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontFamily" Value="Fonts/#RobotoSlab"/>
             <Setter Property="FontStyle" Value="Normal"/>
             <Setter Property="FontWeight" Value="Regular"/>
             <Setter Property="BorderBrush" Value="LightBlue"/>
-            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderThickness" Value="3"/>
             <Setter Property="Margin" Value="3"/>
             <Setter Property="ToolTipService.IsEnabled" Value="False"/>
             <Setter Property="ToolTipService.BetweenShowDelay" Value="0"/>
@@ -69,15 +97,15 @@
                     <ControlTemplate TargetType="{x:Type TextBox}">
                         <Border
                                   Name="Border"
-                                  CornerRadius="2" 
+                                  CornerRadius="5"
                                   Padding="2"
-                                  Background="#FFF"
-                                  BorderBrush="#888"
-                                  BorderThickness="1">
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}">
                             <DockPanel LastChildFill="True">
                                 <Viewbox Name="HelpText" DockPanel.Dock="Left" Width="20" Height="20" Margin="3">
-                                    <Grid Width="20" Height="20" Background="White">
-                                        <Ellipse Stroke="Black" Fill="White" StrokeThickness="1"/>
+                                    <Grid Width="25" Height="25" Background="White">
+                                        <Ellipse Stroke="Black" Fill="White" StrokeThickness="2"/>
                                         <TextBlock Background="White" HorizontalAlignment="Center" Text="?" TextAlignment="Center" VerticalAlignment="Center"/>
                                         <Grid.ToolTip>
                                             <ToolTip Placement="Bottom" ToolTipService.BetweenShowDelay="{TemplateBinding ToolTipService.BetweenShowDelay}" ToolTipService.InitialShowDelay="{TemplateBinding ToolTipService.InitialShowDelay}" ToolTipService.ShowDuration="{TemplateBinding ToolTipService.ShowDuration}" Content="{TemplateBinding ToolTip}"/>
@@ -111,95 +139,194 @@
     </Window.Resources>
     <Grid>
         <TabControl>
-            <TabItem DataContext="{Binding AuctionSettings}">
+            <TabItem Name="tab_GeneralSettings" DataContext="{Binding AuctionSettings}">
                 <TabItem.Header>
                     <TextBlock Style="{StaticResource TabHeader}" Text="Настройка аукциона"/>
                 </TabItem.Header>
-                <StackPanel Orientation="Vertical">
-                    <TextBox Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Orientation="Vertical">
+                        <TextBox Name="textbox_AucTime" Text="{Binding AuctionTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
                              ToolTipService.BetweenShowDelay="0" ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000"
                              Tag="Общее время в формате мм:сс"
                              ToolTip="Время в течение которого можно добавлять новые элементы и делать ставки.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умолчанию: 30:00&#x0a;Пример: 05:30 - 5 минут 30 секунд"/>
-                    <TextBox Name="textbox_ThresholdTime" Text="{Binding DefaultAuctionThresholdTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                        <TextBox Name="textbox_ThresholdTime" Text="{Binding DefaultAuctionThresholdTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
                              Tag="Пороговое время в формате мм:сс"
                              ToolTip="Время при достижении которого условия аукциона изменятся.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умочанию: 03:00&#x0a;Пример: 02:30 - 2 минуты 30 секунд"/>
-                    <TextBox Name="textbox_AddTime" Text="{Binding DefaultAdditionalTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
+                        <TextBox Name="textbox_AddTime" Text="{Binding DefaultAdditionalTime, StringFormat={}{0:mm\\:ss}, Converter={StaticResource StringToTimeSpan} }"
                              Tag="Добавочное время в формате мм:сс"
                              ToolTip="Время которое будет добавлено, если оставшееся время аукциона меньше порогового и произошло перебитие максимальной ставки.&#x0a;Формат: мм:сс, где мм - минуты, сс - секунды.&#x0a;По умочанию: 02:00&#x0a;Пример: 01:30 - 1 минута 30 секунд"/>
-                    <TextBox Name="textbox_MaxElements" Text="{Binding MaxAuctionElements, Mode=TwoWay, TargetNullValue='' }"
+                        <TextBox Name="textbox_MaxElements" Text="{Binding MaxAuctionElements, Mode=TwoWay, TargetNullValue='' }"
                              Tag="Максимальное число элементов аукциона" 
                              ToolTip="Максимальное число элементов при достижении которого добавлять новые элементы будет нельзя.&#x0a;По умолчанию: 0.&#x0a;Для неограниченного количества элементов оставьте пустым или 0." />
-                </StackPanel>
+                        <GroupBox>
+                            <GroupBox.Header>
+                                <TextBox Name="textbox_AllowApis" Margin="5" Text="Способы добавления ставок в очередь" Tag=""
+                                     ToolTip="Способы добавления ставок в очередь разрешенные (зеленый) / запрещенные (серый) для добавления&#x0a;По умолчанию: нет&#x0a;Зеленый: ставки этим способом разрешены и добавляются в очередь.&#x0a;Серый:ставки этим способом не резрешены и не добавляются в очередь.&#x0a;Ставки с ссылками обрабатываются автоматически, ставки 'Без ссылок' обрабатываются вручную пользователем"/>
+                            </GroupBox.Header>
+                            <ListBox x:Name="listbox_UseApi" ItemsSource="{Binding Source={StaticResource ApisEnum}}" VirtualizingPanel.IsVirtualizing="False" BorderThickness="0">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
+                                        <TextBlock x:Name="textblock_ApiName" Text="{Binding Path=., Converter={StaticResource EnumToString}}"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="{x:Type ListBoxItem}">
+                                        <Setter Property="Margin" Value="3"/>
+                                        <Setter Property="Padding" Value="3"/>
+                                        <Setter Property="Background" Value="White"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                    <Border Background="{TemplateBinding Background}" 
+                                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                        <CheckBox x:Name="checkbox_ContentType" Focusable="False" Margin="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}"
+                                                     IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Apis }, Mode=OneWay}">
+                                                            <ContentPresenter VerticalAlignment="Center"/>
+                                                            <i:Interaction.Triggers>
+                                                                <i:EventTrigger EventName="Checked">
+                                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_GeneralSettings, Path=DataContext.AllowApiTypes.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                                </i:EventTrigger>
+                                                                <i:EventTrigger EventName="Unchecked">
+                                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_GeneralSettings, Path=DataContext.AllowApiTypes.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                                </i:EventTrigger>
+                                                            </i:Interaction.Triggers>
+                                                        </CheckBox>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding ElementName=checkbox_ContentType, Path=IsChecked}" Value="True">
+                                                            <Setter Property="Background" Value="LightGreen"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ElementName=checkbox_ContentType, Path=IsChecked}" Value="False">
+                                                            <Setter Property="Background" Value="LightGray"/>
+                                                        </DataTrigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                            </ListBox>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
-            <TabItem Name="tab_Rules" DataContext="{Binding AuctionRules}">
+            <TabItem Name="tab_Rules">
                 <TabItem.Header>
                     <TextBlock Style="{StaticResource TabHeader}" Text="Правила аукциона"/>
                 </TabItem.Header>
-                <StackPanel Orientation="Vertical" Name="popup_Settings">
-                    <TextBox Name="textbox_AuctionRules" MinHeight="50" Text="{Binding AuctionRulesText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
+                <TabControl>
+                    <TabItem DataContext="{Binding AuctionRules}">
+                        <TabItem.Header>
+                            <TextBlock Style="{StaticResource TabHeader}" Text="Игры (Steam)"/>
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem DataContext="{Binding AuctionRules}">
+                        <TabItem.Header>
+                            <TextBlock Style="{StaticResource TabHeader}" Text="Фильмы/сериалы (Kinopoisk)"/>
+                        </TabItem.Header>
+                    </TabItem>
+                    <TabItem Name="tab_ShikimoriRules" DataContext="{Binding AuctionRules}">
+                        <TabItem.Header>
+                            <TextBlock Style="{StaticResource TabHeader}" Text="Аниме (Shikimori)"/>
+                        </TabItem.Header>
+                        <StackPanel Orientation="Vertical" Name="popup_Settings">
+                            <TextBlock Text="&#8195;Создайте несколько пользовательских наград с вводом текста, начинающихся с ключевого слова с разными значениями баллов канала для их активации. &#x0a;Например: 'Ставка 5000', 'Ставка 10000', 'Ставка 20000'&#x0a;&#8195;Добавить аниме из базы Shikimori в список аукциона пользователи могут тремя способами:&#x0a;1) Написать в тексте награды ссылку на аниме на сайте Shikimori.&#x0a;2) Написать в тексте награды либо часть/полное название аниме, которое уже есть в списке лотов.&#x0a;3) Написать в тексте награды порядковый номер лота.&#x0a;Например: 'https://shikimori.one/animes/z9253-steins-gate', 'Врата Штейна', '88'.&#x0a;&#8195;Далее добавленное в список аукциона аниме проверяется на соответствие всем правилам аукциона.&#x0a;Если аниме соответствует всем правилам, то он появляется на экране и ему назначается порядковый номер лота.&#x0a;Если аниме не соответсвует какому-либо правилу, то оно не появляется на экране, а пользователю в чате, добавившему аниме, сообщается об ошибке."/>
+                            <TextBox Name="textbox_AuctionRules" MinHeight="50" Text="{Binding AuctionRulesText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap"
                              Tag="Правила аукциона, подстановки: (years) - интервал даты выхода, (genres) - запрещенные жанры, (kinds) - запрещенные форматы, (titles) - запрещенные названия"
                              ToolTip=""/>
-                    <Expander Header="Год выхода" ExpandDirection="Down" Margin="5">
-                        <StackPanel Orientation="Vertical">
-                            <TextBox Name="textbox_YearFrom" Margin="5" MaxLength="4" Text="{Binding YearFrom, Mode=TwoWay, TargetNullValue=''}" Tag="От"
+                            <Expander Header="Год выхода" ExpandDirection="Down" Margin="5">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBox Name="textbox_YearFrom" Margin="5" MaxLength="4" Text="{Binding YearFrom, Mode=TwoWay, TargetNullValue=''}" Tag="От"
                                      ToolTip="Если дата выхода (год) меньше этого года, его нельзя будет добавить в аукцион.&#x0a;По умолчанию: 0&#x0a;Если год не ограничен оставьте пустым или 0."/>
-                            <TextBox Name="textbox_YearTo" Margin="5" MaxLength="4" Text="{Binding YearTo, Mode=TwoWay, TargetNullValue=''}" Tag="До"
+                                    <TextBox Name="textbox_YearTo" Margin="5" MaxLength="4" Text="{Binding YearTo, Mode=TwoWay, TargetNullValue=''}" Tag="До"
                                      ToolTip="Если дата выхода (год) больше этого года, его нельзя будет добавить в аукцион.&#x0a;По умолчанию: 0&#x0a;Если год не ограничен оставьте пустым или 0."/>
-                        </StackPanel>
-                    </Expander>
-                    <Expander Header="Жанры" ExpandDirection="Down" Margin="5" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
-                        <DockPanel LastChildFill="True">
-                            <TextBox Name="textbox_ForbiddenGenres" Margin="5" Text="Жанры" Tag="" DockPanel.Dock="Top"
-                                     ToolTip="Жанры контента запрещенные/разрешенные для добавления&#x0a;По умолчанию: нет&#x0a;Отмечено: контент с таким жанром запрещен для добавления.&#x0a;Неотмечено: контент с таким жанром разрещен для добавления."/>
-                            <ListBox x:Name="listbox_ForbiddenGenres" ItemsSource="{Binding Source={StaticResource GenresEnum}}" VirtualizingPanel.IsVirtualizing="False">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
-                                    <CheckBox x:Name="checkbox_Genre" Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Genres }, Mode=OneWay}">
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="Checked">
-                                                <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
-                                            </i:EventTrigger>
-                                            <i:EventTrigger EventName="Unchecked">
-                                                <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                    </CheckBox>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                        </DockPanel>
-                    </Expander>
-                    <Expander Header="Форматы" ExpandDirection="Down" Margin="5">
-                        <DockPanel LastChildFill="True">
-                            <TextBox Name="textbox_ForbiddenKinds" Margin="5" Text="Форматы" Tag="" DockPanel.Dock="Top"
+                                </StackPanel>
+                            </Expander>
+                            <Expander ExpandDirection="Down" MaxHeight="200" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <Expander.Header>
+                                    <TextBox Name="textbox_ForbiddenGenres" Margin="5" Text="Жанры" Tag=""
+                                     ToolTip="Жанры контента запрещенные (серый) /разрешенные (зеленый) для добавления&#x0a;По умолчанию: нет&#x0a;Серый: контент с таким жанром запрещен для добавления.&#x0a;Зеленый: контент с таким жанром разрещен для добавления."/>
+                                </Expander.Header>
+                                <ListBox x:Name="listbox_ForbiddenGenres" ItemsSource="{Binding Source={StaticResource GenresEnum}}" VirtualizingPanel.IsVirtualizing="False" BorderThickness="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <!-- {Binding Path=IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}} -->
+                                            <TextBlock x:Name="textblock_ApiName" Text="{Binding Path=., Converter={StaticResource EnumToString}}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="{x:Type ListBoxItem}">
+                                            <Setter Property="Margin" Value="3"/>
+                                            <Setter Property="Padding" Value="3"/>
+                                            <Setter Property="Background" Value="White"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                        <Border Background="{TemplateBinding Background}" 
+                                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                            <CheckBox x:Name="checkbox_ContentType" Focusable="False" Margin="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}"
+                                                     IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Genres }, Mode=OneWay}">
+                                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                                <i:Interaction.Triggers>
+                                                                    <i:EventTrigger EventName="Checked">
+                                                                        <i:InvokeCommandAction Command="{Binding ElementName=tab_ShikimoriRules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                                    </i:EventTrigger>
+                                                                    <i:EventTrigger EventName="Unchecked">
+                                                                        <i:InvokeCommandAction Command="{Binding ElementName=tab_ShikimoriRules, Path=DataContext.ForbiddenGenres.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                                    </i:EventTrigger>
+                                                                </i:Interaction.Triggers>
+                                                            </CheckBox>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <DataTrigger Binding="{Binding ElementName=checkbox_ContentType, Path=IsChecked}" Value="True">
+                                                                <Setter Property="Background" Value="LightGray"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding ElementName=checkbox_ContentType, Path=IsChecked}" Value="False">
+                                                                <Setter Property="Background" Value="LightGreen"/>
+                                                            </DataTrigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
+                            </Expander>
+                            <Expander ExpandDirection="Down" Margin="5">
+                                <Expander.Header>
+                                    <TextBox Name="textbox_ForbiddenKinds" Margin="5" Text="Форматы" Tag=""
                                      ToolTip="Форматы контента запрещенные/разрешенные для добавления&#x0a;По умолчанию: нет&#x0a;Отмечено: контент с таким форматом запрещен для добавления.&#x0a;Неотмечено: контент с таким форматом разрещен для добавления."/>
-                            <ListBox x:Name="listbox_ForbiddenKinds" ItemsSource="{Binding Source={StaticResource KindsEnum}}" VirtualizingPanel.IsVirtualizing="False">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <CheckBox Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Kinds }, Mode=OneWay}">
-                                            <i:Interaction.Triggers>
-                                                <i:EventTrigger EventName="Checked" >
-                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
-                                                </i:EventTrigger>
-                                                <i:EventTrigger EventName="Unchecked">
-                                                    <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
-                                                </i:EventTrigger>
-                                            </i:Interaction.Triggers>
-                                        </CheckBox>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </DockPanel>
-                    </Expander>
-                    <Expander Header="Запрещенные названия" ExpandDirection="Down" Margin="5" MaxHeight="200">
-                        <TextBox AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                </Expander.Header>
+                                <DockPanel LastChildFill="True">
+                                    <ListBox x:Name="listbox_ForbiddenKinds" ItemsSource="{Binding Source={StaticResource KindsEnum}}" VirtualizingPanel.IsVirtualizing="False">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding Path=., Converter={StaticResource EnumToString}}" IsChecked="{Binding Path=., Converter={StaticResource ListEnumToBool}, ConverterParameter={x:Static classes:CollectionType.Kinds }, Mode=OneWay}">
+                                                    <i:Interaction.Triggers>
+                                                        <i:EventTrigger EventName="Checked" >
+                                                            <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                        </i:EventTrigger>
+                                                        <i:EventTrigger EventName="Unchecked">
+                                                            <i:InvokeCommandAction Command="{Binding ElementName=tab_Rules, Path=DataContext.ForbiddenKinds.AddRemoveCommand}" CommandParameter="{Binding}"/>
+                                                        </i:EventTrigger>
+                                                    </i:Interaction.Triggers>
+                                                </CheckBox>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </DockPanel>
+                            </Expander>
+                            <Expander Header="Запрещенные названия" ExpandDirection="Down" Margin="5" MaxHeight="200">
+                                <TextBox AcceptsReturn="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
                                  Tag="Одно название на строку" 
                                  ToolTip="Название контента или его часть (фильма, аниме и т.д), которое нельзя будет добавить в аукцион. "/>
-                    </Expander>
-                </StackPanel>
+                            </Expander>
+                        </StackPanel>
+                    </TabItem>
+                </TabControl>
             </TabItem>
-            <TabItem  DataContext="{Binding PubSettings}">
+            <TabItem DataContext="{Binding PubSettings}">
                 <TabItem.Header>
                     <TextBlock Style="{StaticResource TabHeader}" Text="Настройки Twitch PubSub"/>
                 </TabItem.Header>

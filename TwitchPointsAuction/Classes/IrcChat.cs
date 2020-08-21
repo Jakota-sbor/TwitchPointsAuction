@@ -14,6 +14,12 @@ namespace TwitchPointsAuction.Classes
     {
         //public event OnMessageHandler OnMessage;
 
+        private static IrcChat instance;
+        public static IrcChat Instance
+        {
+            get { return instance ?? (instance = new IrcChat()); }
+        }
+
         public bool IsConnected
         {
             get

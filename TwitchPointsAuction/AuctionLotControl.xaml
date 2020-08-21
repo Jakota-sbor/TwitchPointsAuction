@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="TwitchPointsAuction.AnimeDetailsControl"
+﻿<UserControl x:Class="TwitchPointsAuction.AuctionLotControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,7 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
-             d:DesignHeight="320" d:DesignWidth="240" RenderTransformOrigin="0.5,0.5" ClipToBounds="True">
+             d:DesignHeight="240" d:DesignWidth="240" RenderTransformOrigin="0.5,0.5" ClipToBounds="True">
     <UserControl.Resources>
         <classes:GenresToStringConverter x:Key="GenresToString"/>
         <Style TargetType="TextBlock">
@@ -18,6 +18,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Margin" Value="3"/>
         </Style>
+        <!--
         <Storyboard x:Key="moveAnimation">
             <DoubleAnimation To="{Binding ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" Duration="0:0:5" RepeatBehavior="1x" AutoReverse="True"  
                              Storyboard.TargetName="image_Poster" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"/>
@@ -54,6 +55,7 @@
                 <LinearDoubleKeyFrame Value="0" KeyTime="0:0:26" />
             </DoubleAnimationUsingKeyFrames>
         </Storyboard>
+        -->
     </UserControl.Resources>
     <UserControl.RenderTransform>
         <TransformGroup>
@@ -65,26 +67,27 @@
     </UserControl.RenderTransform>
     <!-- DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" -->
     <Border x:Name="border" DataContext="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}">
+        <!--
         <i:Interaction.Triggers>
             <i:EventTrigger EventName="Loaded" SourceObject="{Binding ElementName=border}">
                 <i:ControlStoryboardAction ControlStoryboardOption="Play" Storyboard="{StaticResource showPosterStoryboard}"/>
-                <!--
+                commect
                 <i:ChangePropertyAction TargetObject="{Binding ElementName=border}" PropertyName="Background" Value="Black"/>
-                -->
+                'commect
             </i:EventTrigger>
-            <!--
+            commect
             <i:DataTrigger Binding="{Binding}" Value="100" Comparison="LessThanOrEqual">
                 <i:ChangePropertyAction TargetObject="{Binding}" PropertyName="TitlePosition"  Value="{x:Static Dock.Right}"/>
             </i:DataTrigger>
-            -->
+            'commect
         </i:Interaction.Triggers>
+        -->
         <Grid>
-            <DockPanel  x:Name="grid_Details" Opacity="0" Margin="5" LastChildFill="True">
-                <TextBlock Name="textblock_Title" DockPanel.Dock="Top" FontSize="16" FontWeight="Bold"
-                               HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                               TextAlignment="Center"
-                               TextWrapping="WrapWithOverflow"
-                               Text="{Binding AnimeContent.NameRus, FallbackValue=''}"/>
+            <StackPanel Orientation="Horizontal" x:Name="grid_LotDetails" Opacity="1" Margin="5" >
+                <TextBlock Name="textblock_Title" FontSize="16" FontWeight="Bold" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextAlignment="Center" TextWrapping="WrapWithOverflow" Text="{Binding LotContent.Name, FallbackValue=''}"/>
+                <Image Name="image_Poster" Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding LotContent.PosterUri}" Margin="3"/>
+
+                <!--
                 <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                     <TextBlock Name="textblock_ReleaseDate" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
                                Text="{Binding AnimeContent.AiredDate, FallbackValue='Дата: 10.10.2020', StringFormat='Дата: dd.MM.yyyy'}"/>
@@ -95,6 +98,7 @@
                     <TextBlock Name="textblock_Episodes" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" TextAlignment="Center" FontWeight="SemiBold"
                                Text="{Binding AnimeContent.Episodes, FallbackValue='', StringFormat='Эпизодов: {0}'}"/>
                 </StackPanel>
+                -->
                 <!--
                 <TextBlock Name="textblock_Seasons" Text="{Binding SeasonsCount, StringFormat='Сезонов: {0}'}"/>
                 <TextBlock Name="textblock_Duration" Text="{Binding Duration, StringFormat='Время: {0} мин'}"/>
@@ -109,21 +113,22 @@
                     </i:DataTrigger>
                 </i:Interaction.Triggers>
                 -->
-            </DockPanel>
+            </StackPanel>
+            <!--
             <Grid Name="grid_Description" Opacity="0" RenderTransformOrigin="0.5,0.5" Margin="5">
-                <!--
+                
                 <ScrollViewer Name="scroll_Description" VerticalScrollBarVisibility="Hidden" Margin="5">
-                -->
+                
                 <TextBlock Name="textblock_Description" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
                            TextWrapping="Wrap"  TextTrimming="WordEllipsis"  TextAlignment="Justify"
                            Text="{Binding AnimeContent.Description,FallbackValue='Ничем не примечательный школьник Сакута Адзусагава проводит всё своё свободное время в библиотеке. Однажды он встречает девушку в костюме кролика, которая старше его на год. Она представляется как Маи Сакурадзима — прославленная актриса и первая красавица школы. Девушка рассказывает, что все вокруг перестали «видеть» её, поэтому она оделась так вызывающе. По мнению Маи, всё это из-за загадочного «подросткового синдрома». Адзусагава, недолго думая, решает помочь Сакурадзиме в решении этой странной проблемы. Однако кто мог знать, чем это обернётся...'}"/>
             </Grid>
-            <Grid Name="grid_Poster" Margin="5" RenderTransformOrigin="0.5,0.5">
-                <!--
+            -->
+        <!--
+        <Grid Name="grid_Poster" Margin="5" RenderTransformOrigin="0.5,0.5">
+                
                 {Binding TitlePosition, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}
-                -->
-                <Image Name="image_Poster"
-                       Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Stretch" Source="{Binding AnimeContent.PosterUri}" Margin="3"/>
+                
                 <Grid.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleX="1"/>
@@ -132,7 +137,8 @@
                         <TranslateTransform/>
                     </TransformGroup>
                 </Grid.RenderTransform>
-            </Grid>
+        </Grid>
+        --> 
         </Grid>
     </Border>
 </UserControl>
